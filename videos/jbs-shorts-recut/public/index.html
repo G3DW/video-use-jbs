@@ -1,0 +1,1239 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @font-face { font-family: "Nunito"; src: url("fonts/Nunito-400.ttf") format("truetype"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Nunito"; src: url("fonts/Nunito-700.ttf") format("truetype"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "Nunito"; src: url("fonts/Nunito-800.ttf") format("truetype"); font-weight: 800; font-display: block; }
+      @font-face { font-family: "Nunito"; src: url("fonts/Nunito-900.ttf") format("truetype"); font-weight: 900; font-display: block; }
+      @font-face { font-family: "Nunito Sans"; src: url("fonts/Nunito-400.ttf") format("truetype"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Nunito Sans"; src: url("fonts/Nunito-700.ttf") format("truetype"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "JetBrains Mono"; src: url("fonts/JetBrainsMono-400.ttf") format("truetype"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "JetBrains Mono"; src: url("fonts/JetBrainsMono-500.ttf") format("truetype"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "JetBrains Mono"; src: url("fonts/JetBrainsMono-700.ttf") format("truetype"); font-weight: 700; font-display: block; }
+
+      :root {
+        --bg: #1B2A3B;
+        --text: #F1F5F9;
+        --accent-0: #4DD9C0;
+        --accent-1: #5BCFEA;
+        --accent-2: #8B9FD4;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+        background: #000;
+        font-family: 'Nunito', 'Nunito Sans', 'JetBrains Mono', ui-sans-serif, system-ui, sans-serif;
+      }
+      #stage { position: relative; width: 100%; height: 100%; overflow: hidden; }
+      .video-wrapper {
+        position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: hidden;
+      }
+      .video-wrapper video { width: 100%; height: 100%; object-fit: cover; }
+      .card-host { position: absolute; pointer-events: none; overflow: hidden; }
+      .card-host .card { position: relative; width: 100%; height: 100%; overflow: hidden; }
+    </style>
+  </head>
+  <body>
+    <div
+      id="stage"
+      data-composition-id="talking-head-recut"
+      data-start="0"
+      data-duration="270.14"
+      data-fps="30"
+      data-width="1080"
+      data-height="1920"
+    >
+      <div class="video-wrapper" id="video-wrap">
+        <video
+          id="bg-video"
+          src="input-video.mp4"
+          muted
+          playsinline
+          style="opacity:1"
+          data-start="0"
+          data-duration="270.14"
+          data-track-index="1"
+        ></video>
+      </div>
+      <audio
+        id="source-audio"
+        src="input-video.mp4"
+        data-start="0"
+        data-duration="270.14"
+        data-track-index="10"
+        data-volume="1"
+      ></audio>
+
+      <div
+        id="host-card-01"
+        class="card-host clip"
+        data-card-id="card-01"
+        data-start="0.03333333333333333"
+        data-duration="22.4"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-01">
+          <style>
+            .card[data-card-id="card-01"] .root {
+              width: 100%; height: 100%;
+              display: flex; align-items: flex-end; justify-content: center;
+              padding: 0 32px 140px;
+              font-family: 'Nunito Sans', 'Inter', sans-serif;
+              background: transparent;
+            }
+            .card[data-card-id="card-01"] .panel {
+              width: 100%;
+              max-width: 1016px;
+              background: rgba(15,28,43,0.86);
+              border: 1px solid rgba(77,217,192,0.35);
+              border-radius: 16px;
+              padding: 32px 32px 36px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+              backdrop-filter: blur(10px);
+            }
+            .card[data-card-id="card-01"] .rule {
+              width: 0; height: 4px; border-radius: 4px;
+              background: linear-gradient(90deg, #4DD9C0, #8B9FD4);
+              margin-bottom: 16px;
+            }
+            .card[data-card-id="card-01"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 20px; font-weight: 500; letter-spacing: 0.14em;
+              color: #4DD9C0; text-transform: uppercase; margin-bottom: 14px;
+            }
+            .card[data-card-id="card-01"] .title {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 56px; line-height: 1.12; color: #FFFFFF; margin: 0 0 16px;
+            }
+            .card[data-card-id="card-01"] .detail {
+              font-family: 'Nunito Sans', sans-serif; font-weight: 400;
+              font-size: 32px; line-height: 1.45; color: #A8B8CC; margin: 0;
+            }
+          </style>
+          <div class="root">
+            <div class="panel">
+              <div class="rule" id="card-01-rule" data-anim="grow-x" data-anim-at="0.15" data-anim-duration="0.45" data-anim-target-w="120"></div>
+              <div class="kicker" id="card-01-kicker" data-anim="fade-in" data-anim-at="0.2" data-anim-duration="0.4">HERE WE GO AGAIN</div>
+              <h1 class="title" id="card-01-title" data-anim="slide-in" data-anim-at="0.3" data-anim-duration="0.5" data-anim-from="bottom" data-anim-distance="24">“The water argument”</h1>
+              <p class="detail" id="card-01-detail" data-anim="fade-in" data-anim-at="0.55" data-anim-duration="0.5">If your case against AI is data-center water use — do your homework. And get off social media.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="host-card-02"
+        class="card-host clip"
+        data-card-id="card-02"
+        data-start="22.5"
+        data-duration="8.766666666666667"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-02">
+          <style>
+            .card[data-card-id="card-02"] .root {
+              width: 100%; height: 100%;
+              display: flex; align-items: flex-end; justify-content: center;
+              padding: 0 32px 140px;
+              font-family: 'Nunito Sans', 'Inter', sans-serif;
+              background: transparent;
+            }
+            .card[data-card-id="card-02"] .panel {
+              width: 100%;
+              max-width: 1016px;
+              background: rgba(15,28,43,0.86);
+              border: 1px solid rgba(77,217,192,0.35);
+              border-radius: 16px;
+              padding: 32px 32px 36px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+              backdrop-filter: blur(10px);
+            }
+            .card[data-card-id="card-02"] .rule {
+              width: 0; height: 4px; border-radius: 4px;
+              background: linear-gradient(90deg, #5BCFEA, #8B9FD4);
+              margin-bottom: 16px;
+            }
+            .card[data-card-id="card-02"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 20px; font-weight: 500; letter-spacing: 0.14em;
+              color: #5BCFEA; text-transform: uppercase; margin-bottom: 14px;
+            }
+            .card[data-card-id="card-02"] .title {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 56px; line-height: 1.12; color: #FFFFFF; margin: 0 0 16px;
+            }
+            .card[data-card-id="card-02"] .detail {
+              font-family: 'Nunito Sans', sans-serif; font-weight: 400;
+              font-size: 32px; line-height: 1.45; color: #A8B8CC; margin: 0;
+            }
+          </style>
+          <div class="root">
+            <div class="panel">
+              <div class="rule" id="card-02-rule" data-anim="grow-x" data-anim-at="0.15" data-anim-duration="0.45" data-anim-target-w="120"></div>
+              <div class="kicker" id="card-02-kicker" data-anim="fade-in" data-anim-at="0.2" data-anim-duration="0.4">THE LOGIC GAP</div>
+              <h1 class="title" id="card-02-title" data-anim="slide-in" data-anim-at="0.3" data-anim-duration="0.5" data-anim-from="bottom" data-anim-distance="24">You can’t say both</h1>
+              <p class="detail" id="card-02-detail" data-anim="fade-in" data-anim-at="0.55" data-anim-duration="0.5">“I’ll never use AI — the data centers waste too much water.”</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="host-card-03"
+        class="card-host clip"
+        data-card-id="card-03"
+        data-start="31.333333333333332"
+        data-duration="6.4"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-03">
+          <style>
+            .card[data-card-id="card-03"] .root {
+              width: 100%; height: 100%;
+              display: flex; align-items: flex-end; justify-content: center;
+              padding: 0 32px 140px;
+              font-family: 'Nunito Sans', 'Inter', sans-serif;
+              background: transparent;
+            }
+            .card[data-card-id="card-03"] .panel {
+              width: 100%;
+              max-width: 1016px;
+              background: rgba(15,28,43,0.86);
+              border: 1px solid rgba(77,217,192,0.35);
+              border-radius: 16px;
+              padding: 32px 32px 36px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+              backdrop-filter: blur(10px);
+            }
+            .card[data-card-id="card-03"] .rule {
+              width: 0; height: 4px; border-radius: 4px;
+              background: linear-gradient(90deg, #5BCFEA, #8B9FD4);
+              margin-bottom: 16px;
+            }
+            .card[data-card-id="card-03"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 20px; font-weight: 500; letter-spacing: 0.14em;
+              color: #5BCFEA; text-transform: uppercase; margin-bottom: 14px;
+            }
+            .card[data-card-id="card-03"] .title {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 56px; line-height: 1.12; color: #FFFFFF; margin: 0 0 16px;
+            }
+            .card[data-card-id="card-03"] .detail {
+              font-family: 'Nunito Sans', sans-serif; font-weight: 400;
+              font-size: 32px; line-height: 1.45; color: #A8B8CC; margin: 0;
+            }
+          </style>
+          <div class="root">
+            <div class="panel">
+              <div class="rule" id="card-03-rule" data-anim="grow-x" data-anim-at="0.15" data-anim-duration="0.45" data-anim-target-w="120"></div>
+              <div class="kicker" id="card-03-kicker" data-anim="fade-in" data-anim-at="0.2" data-anim-duration="0.4">FACT</div>
+              <h1 class="title" id="card-03-title" data-anim="slide-in" data-anim-at="0.3" data-anim-duration="0.5" data-anim-from="bottom" data-anim-distance="24">Data centers aren’t new</h1>
+              <p class="detail" id="card-03-detail" data-anim="fade-in" data-anim-at="0.55" data-anim-duration="0.5">Around for decades. They’re everywhere.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="host-card-04"
+        class="card-host clip"
+        data-card-id="card-04"
+        data-start="37.766666666666666"
+        data-duration="17.433333333333334"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-04">
+          <style>
+            .card[data-card-id="card-04"] .root {
+              width: 100%; height: 100%;
+              display: flex; align-items: flex-end; justify-content: center;
+              padding: 0 32px 140px;
+              font-family: 'Nunito Sans', sans-serif;
+              background: transparent;
+            }
+            .card[data-card-id="card-04"] .panel {
+              width: 100%; max-width: 1016px;
+              background: rgba(15,28,43,0.88);
+              border: 1px solid rgba(77,217,192,0.35);
+              border-radius: 16px;
+              padding: 32px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+              backdrop-filter: blur(10px);
+            }
+            .card[data-card-id="card-04"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 20px; font-weight: 500; letter-spacing: 0.14em;
+              color: #4DD9C0; text-transform: uppercase; margin-bottom: 20px;
+            }
+            .card[data-card-id="card-04"] .chip {
+              font-family: 'JetBrains Mono', monospace; font-weight: 500;
+              font-size: 34px; color: #FFFFFF;
+              border-left: 4px solid #4DD9C0;
+              padding: 8px 0 8px 18px; margin-bottom: 10px;
+            }
+            .card[data-card-id="card-04"] .chip-final {
+              color: #4DD9C0; font-weight: 700;
+            }
+            .card[data-card-id="card-04"] .punch {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 48px; color: #FFFFFF; margin: 18px 0 0;
+            }
+          </style>
+          <div class="root">
+            <div class="panel">
+              <div class="kicker" id="card-04-kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">EVERYTHING RUNS ON ONE</div>
+              <div class="chip" id="card-04-chip-0" data-anim="slide-in" data-anim-at="0.15" data-anim-duration="0.4" data-anim-from="left" data-anim-distance="40">FACEBOOK</div>
+              <div class="chip" id="card-04-chip-1" data-anim="slide-in" data-anim-at="0.43" data-anim-duration="0.4" data-anim-from="left" data-anim-distance="40">INSTAGRAM</div>
+              <div class="chip" id="card-04-chip-2" data-anim="slide-in" data-anim-at="0.71" data-anim-duration="0.4" data-anim-from="left" data-anim-distance="40">TIKTOK</div>
+              <div class="chip chip-final" id="card-04-chip-3" data-anim="slide-in" data-anim-at="0.99" data-anim-duration="0.4" data-anim-from="left" data-anim-distance="40">→ DATA CENTER</div>
+              <p class="punch" id="card-04-punch" data-anim="scale-pop" data-anim-at="1.5" data-anim-duration="0.5">Your point is moot.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="host-card-05"
+        class="card-host clip"
+        data-card-id="card-05"
+        data-start="55.233333333333334"
+        data-duration="34.733333333333334"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-05">
+          <style>
+            .card[data-card-id="card-05"] .root {
+              width: 100%; height: 100%;
+              display: flex; align-items: flex-end; justify-content: center;
+              padding: 0 32px 140px;
+              font-family: 'Nunito Sans', 'Inter', sans-serif;
+              background: transparent;
+            }
+            .card[data-card-id="card-05"] .panel {
+              width: 100%;
+              max-width: 1016px;
+              background: rgba(15,28,43,0.86);
+              border: 1px solid rgba(77,217,192,0.35);
+              border-radius: 16px;
+              padding: 32px 32px 36px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+              backdrop-filter: blur(10px);
+            }
+            .card[data-card-id="card-05"] .rule {
+              width: 0; height: 4px; border-radius: 4px;
+              background: linear-gradient(90deg, #8B9FD4, #8B9FD4);
+              margin-bottom: 16px;
+            }
+            .card[data-card-id="card-05"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 20px; font-weight: 500; letter-spacing: 0.14em;
+              color: #8B9FD4; text-transform: uppercase; margin-bottom: 14px;
+            }
+            .card[data-card-id="card-05"] .title {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 56px; line-height: 1.12; color: #FFFFFF; margin: 0 0 16px;
+            }
+            .card[data-card-id="card-05"] .detail {
+              font-family: 'Nunito Sans', sans-serif; font-weight: 400;
+              font-size: 32px; line-height: 1.45; color: #A8B8CC; margin: 0;
+            }
+          </style>
+          <div class="root">
+            <div class="panel">
+              <div class="rule" id="card-05-rule" data-anim="grow-x" data-anim-at="0.15" data-anim-duration="0.45" data-anim-target-w="120"></div>
+              <div class="kicker" id="card-05-kicker" data-anim="fade-in" data-anim-at="0.2" data-anim-duration="0.4">A REAL EXAMPLE</div>
+              <h1 class="title" id="card-05-title" data-anim="slide-in" data-anim-at="0.3" data-anim-duration="0.5" data-anim-from="bottom" data-anim-distance="24">MLB deadline flyer</h1>
+              <p class="detail" id="card-05-detail" data-anim="fade-in" data-anim-at="0.55" data-anim-duration="0.5">A buddy’s small business used AI to whip up a sale flyer before the MLB trading deadline. It saved him time — that’s the whole point.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="host-card-06"
+        class="card-host clip"
+        data-card-id="card-06"
+        data-start="90"
+        data-duration="18.466666666666665"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-06">
+          <style>
+            .card[data-card-id="card-06"] .root {
+              width: 100%; height: 100%;
+              display: flex; align-items: flex-end; justify-content: center;
+              padding: 0 32px 140px;
+              font-family: 'Nunito Sans', 'Inter', sans-serif;
+              background: transparent;
+            }
+            .card[data-card-id="card-06"] .panel {
+              width: 100%;
+              max-width: 1016px;
+              background: rgba(15,28,43,0.86);
+              border: 1px solid rgba(77,217,192,0.35);
+              border-radius: 16px;
+              padding: 32px 32px 36px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+              backdrop-filter: blur(10px);
+            }
+            .card[data-card-id="card-06"] .rule {
+              width: 0; height: 4px; border-radius: 4px;
+              background: linear-gradient(90deg, #4DD9C0, #8B9FD4);
+              margin-bottom: 16px;
+            }
+            .card[data-card-id="card-06"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 20px; font-weight: 500; letter-spacing: 0.14em;
+              color: #4DD9C0; text-transform: uppercase; margin-bottom: 14px;
+            }
+            .card[data-card-id="card-06"] .title {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 56px; line-height: 1.12; color: #FFFFFF; margin: 0 0 16px;
+            }
+            .card[data-card-id="card-06"] .detail {
+              font-family: 'Nunito Sans', sans-serif; font-weight: 400;
+              font-size: 32px; line-height: 1.45; color: #A8B8CC; margin: 0;
+            }
+          </style>
+          <div class="root">
+            <div class="panel">
+              <div class="rule" id="card-06-rule" data-anim="grow-x" data-anim-at="0.15" data-anim-duration="0.45" data-anim-target-w="120"></div>
+              <div class="kicker" id="card-06-kicker" data-anim="fade-in" data-anim-at="0.2" data-anim-duration="0.4">13 YEARS A DESIGNER</div>
+              <h1 class="title" id="card-06-title" data-anim="slide-in" data-anim-at="0.3" data-anim-duration="0.5" data-anim-from="bottom" data-anim-distance="24">AI didn’t replace him</h1>
+              <p class="detail" id="card-06-detail" data-anim="fade-in" data-anim-at="0.55" data-anim-duration="0.5">The shirts, the hats, the designs — still all him. He just doesn’t use AI for that part.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="host-card-07"
+        class="card-host clip"
+        data-card-id="card-07"
+        data-start="108.53333333333333"
+        data-duration="9.266666666666667"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-07">
+          <style>
+            .card[data-card-id="card-07"] .root {
+              width: 100%; height: 100%;
+              display: flex; align-items: flex-end; justify-content: center;
+              padding: 0 32px 140px;
+              font-family: 'Nunito Sans', 'Inter', sans-serif;
+              background: transparent;
+            }
+            .card[data-card-id="card-07"] .panel {
+              width: 100%;
+              max-width: 1016px;
+              background: rgba(15,28,43,0.86);
+              border: 1px solid rgba(77,217,192,0.35);
+              border-radius: 16px;
+              padding: 32px 32px 36px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+              backdrop-filter: blur(10px);
+            }
+            .card[data-card-id="card-07"] .rule {
+              width: 0; height: 4px; border-radius: 4px;
+              background: linear-gradient(90deg, #4DD9C0, #8B9FD4);
+              margin-bottom: 16px;
+            }
+            .card[data-card-id="card-07"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 20px; font-weight: 500; letter-spacing: 0.14em;
+              color: #4DD9C0; text-transform: uppercase; margin-bottom: 14px;
+            }
+            .card[data-card-id="card-07"] .title {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 56px; line-height: 1.12; color: #FFFFFF; margin: 0 0 16px;
+            }
+            .card[data-card-id="card-07"] .detail {
+              font-family: 'Nunito Sans', sans-serif; font-weight: 400;
+              font-size: 32px; line-height: 1.45; color: #A8B8CC; margin: 0;
+            }
+          </style>
+          <div class="root">
+            <div class="panel">
+              <div class="rule" id="card-07-rule" data-anim="grow-x" data-anim-at="0.15" data-anim-duration="0.45" data-anim-target-w="120"></div>
+              <div class="kicker" id="card-07-kicker" data-anim="fade-in" data-anim-at="0.2" data-anim-duration="0.4">WHERE AI ACTUALLY HELPS</div>
+              <h1 class="title" id="card-07-title" data-anim="slide-in" data-anim-at="0.3" data-anim-duration="0.5" data-anim-from="bottom" data-anim-distance="24">The monotonous stuff</h1>
+              <p class="detail" id="card-07-detail" data-anim="fade-in" data-anim-at="0.55" data-anim-duration="0.5">Take advantage of the busywork it removes — keep the creativity.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="host-card-08"
+        class="card-host clip"
+        data-card-id="card-08"
+        data-start="117.83333333333333"
+        data-duration="37.63333333333333"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-08">
+          <style>
+            .card[data-card-id="card-08"] .root {
+              width: 100%; height: 100%;
+              display: flex; align-items: flex-end; justify-content: center;
+              padding: 0 32px 140px;
+              font-family: 'Nunito Sans', 'Inter', sans-serif;
+              background: transparent;
+            }
+            .card[data-card-id="card-08"] .panel {
+              width: 100%;
+              max-width: 1016px;
+              background: rgba(15,28,43,0.86);
+              border: 1px solid rgba(77,217,192,0.35);
+              border-radius: 16px;
+              padding: 32px 32px 36px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+              backdrop-filter: blur(10px);
+            }
+            .card[data-card-id="card-08"] .rule {
+              width: 0; height: 4px; border-radius: 4px;
+              background: linear-gradient(90deg, #5BCFEA, #8B9FD4);
+              margin-bottom: 16px;
+            }
+            .card[data-card-id="card-08"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 20px; font-weight: 500; letter-spacing: 0.14em;
+              color: #5BCFEA; text-transform: uppercase; margin-bottom: 14px;
+            }
+            .card[data-card-id="card-08"] .title {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 56px; line-height: 1.12; color: #FFFFFF; margin: 0 0 16px;
+            }
+            .card[data-card-id="card-08"] .detail {
+              font-family: 'Nunito Sans', sans-serif; font-weight: 400;
+              font-size: 32px; line-height: 1.45; color: #A8B8CC; margin: 0;
+            }
+          </style>
+          <div class="root">
+            <div class="panel">
+              <div class="rule" id="card-08-rule" data-anim="grow-x" data-anim-at="0.15" data-anim-duration="0.45" data-anim-target-w="120"></div>
+              <div class="kicker" id="card-08-kicker" data-anim="fade-in" data-anim-at="0.2" data-anim-duration="0.4">FROM THE COMMENTS</div>
+              <h1 class="title" id="card-08-title" data-anim="slide-in" data-anim-at="0.3" data-anim-duration="0.5" data-anim-from="bottom" data-anim-distance="24">“How many bottles of water did you drink at Kinko’s?”</h1>
+              <p class="detail" id="card-08-detail" data-anim="fade-in" data-anim-at="0.55" data-anim-duration="0.5">Before AI, flyers meant driving to Kinko’s to print. Nobody billed that water — but suddenly this counts?</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="host-card-09"
+        class="card-host clip"
+        data-card-id="card-09"
+        data-start="155.46666666666667"
+        data-duration="13.8"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-09">
+          <style>
+            .card[data-card-id="card-09"] .root {
+              width: 100%; height: 100%;
+              display: flex; align-items: flex-end; justify-content: center;
+              padding: 0 32px 140px;
+              font-family: 'Nunito Sans', 'Inter', sans-serif;
+              background: transparent;
+            }
+            .card[data-card-id="card-09"] .panel {
+              width: 100%;
+              max-width: 1016px;
+              background: rgba(15,28,43,0.86);
+              border: 1px solid rgba(77,217,192,0.35);
+              border-radius: 16px;
+              padding: 32px 32px 36px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+              backdrop-filter: blur(10px);
+            }
+            .card[data-card-id="card-09"] .rule {
+              width: 0; height: 4px; border-radius: 4px;
+              background: linear-gradient(90deg, #8B9FD4, #8B9FD4);
+              margin-bottom: 16px;
+            }
+            .card[data-card-id="card-09"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 20px; font-weight: 500; letter-spacing: 0.14em;
+              color: #8B9FD4; text-transform: uppercase; margin-bottom: 14px;
+            }
+            .card[data-card-id="card-09"] .title {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 56px; line-height: 1.12; color: #FFFFFF; margin: 0 0 16px;
+            }
+            .card[data-card-id="card-09"] .detail {
+              font-family: 'Nunito Sans', sans-serif; font-weight: 400;
+              font-size: 32px; line-height: 1.45; color: #A8B8CC; margin: 0;
+            }
+          </style>
+          <div class="root">
+            <div class="panel">
+              <div class="rule" id="card-09-rule" data-anim="grow-x" data-anim-at="0.15" data-anim-duration="0.45" data-anim-target-w="120"></div>
+              <div class="kicker" id="card-09-kicker" data-anim="fade-in" data-anim-at="0.2" data-anim-duration="0.4">SAME THING, NEW NAME</div>
+              <h1 class="title" id="card-09-title" data-anim="slide-in" data-anim-at="0.3" data-anim-duration="0.5" data-anim-from="bottom" data-anim-distance="24">“The cloud” = a data center</h1>
+              <p class="detail" id="card-09-detail" data-anim="fade-in" data-anim-at="0.55" data-anim-duration="0.5">Social media running on “the cloud” is the same infrastructure as AI. It's essentially identical.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="host-card-10"
+        class="card-host clip"
+        data-card-id="card-10"
+        data-start="169.3"
+        data-duration="20.533333333333335"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-10">
+          <style>
+            .card[data-card-id="card-10"] .root {
+              width: 100%; height: 100%;
+              display: flex; flex-direction: column; align-items: center; justify-content: center;
+              text-align: center; padding: 0 48px;
+              font-family: 'Nunito Sans', sans-serif;
+              background: rgba(27,42,59,0.55);
+            }
+            .card[data-card-id="card-10"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 24px; font-weight: 500; letter-spacing: 0.18em;
+              color: #4DD9C0; text-transform: uppercase; margin-bottom: 28px;
+            }
+            .card[data-card-id="card-10"] .number {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 200px; line-height: 1; color: #FFFFFF;
+              text-shadow: 0 0 60px rgba(77,217,192,0.45);
+            }
+            .card[data-card-id="card-10"] .suffix {
+              font-family: 'JetBrains Mono', monospace; font-weight: 700;
+              font-size: 56px; letter-spacing: 0.08em; color: #4DD9C0; margin-top: 4px;
+            }
+            .card[data-card-id="card-10"] .label {
+              font-family: 'Nunito Sans', sans-serif; font-weight: 400;
+              font-size: 34px; line-height: 1.4; color: #A8B8CC;
+              margin-top: 32px; max-width: 820px;
+            }
+            .card[data-card-id="card-10"] .rule {
+              width: 0; height: 4px; border-radius: 4px;
+              background: linear-gradient(90deg, #4DD9C0, #8B9FD4);
+              margin-top: 32px;
+            }
+          </style>
+          <div class="root">
+            <div class="kicker" id="card-10-kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">FACTUAL TRIVIA</div>
+            <div class="number" id="card-10-number" data-anim="count-up" data-anim-at="0.3" data-anim-duration="1.1" data-anim-from="0" data-anim-to="20" data-anim-format=",d">0</div>
+            <div class="suffix" id="card-10-suffix" data-anim="fade-in" data-anim-at="0.9" data-anim-duration="0.4">TRILLION</div>
+            <p class="label" id="card-10-label" data-anim="fade-in" data-anim-at="1.2" data-anim-duration="0.5">gallons of water spent yearly on U.S. corn production</p>
+            <div class="rule" id="card-10-rule" data-anim="grow-x" data-anim-at="1.4" data-anim-duration="0.5" data-anim-target-w="140"></div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="host-card-11"
+        class="card-host clip"
+        data-card-id="card-11"
+        data-start="189.86666666666667"
+        data-duration="8.666666666666666"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-11">
+          <style>
+            .card[data-card-id="card-11"] .root {
+              width: 100%; height: 100%;
+              display: flex; align-items: flex-end; justify-content: center;
+              padding: 0 32px 140px;
+              font-family: 'Nunito Sans', 'Inter', sans-serif;
+              background: transparent;
+            }
+            .card[data-card-id="card-11"] .panel {
+              width: 100%;
+              max-width: 1016px;
+              background: rgba(15,28,43,0.86);
+              border: 1px solid rgba(77,217,192,0.35);
+              border-radius: 16px;
+              padding: 32px 32px 36px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+              backdrop-filter: blur(10px);
+            }
+            .card[data-card-id="card-11"] .rule {
+              width: 0; height: 4px; border-radius: 4px;
+              background: linear-gradient(90deg, #4DD9C0, #8B9FD4);
+              margin-bottom: 16px;
+            }
+            .card[data-card-id="card-11"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 20px; font-weight: 500; letter-spacing: 0.14em;
+              color: #4DD9C0; text-transform: uppercase; margin-bottom: 14px;
+            }
+            .card[data-card-id="card-11"] .title {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 56px; line-height: 1.12; color: #FFFFFF; margin: 0 0 16px;
+            }
+            .card[data-card-id="card-11"] .detail {
+              font-family: 'Nunito Sans', sans-serif; font-weight: 400;
+              font-size: 32px; line-height: 1.45; color: #A8B8CC; margin: 0;
+            }
+          </style>
+          <div class="root">
+            <div class="panel">
+              <div class="rule" id="card-11-rule" data-anim="grow-x" data-anim-at="0.15" data-anim-duration="0.45" data-anim-target-w="120"></div>
+              <div class="kicker" id="card-11-kicker" data-anim="fade-in" data-anim-at="0.2" data-anim-duration="0.4">FAIR ENOUGH</div>
+              <h1 class="title" id="card-11-title" data-anim="slide-in" data-anim-at="0.3" data-anim-duration="0.5" data-anim-from="bottom" data-anim-distance="24">“Well — it's corn. We eat it.”</h1>
+              <p class="detail" id="card-11-detail" data-anim="fade-in" data-anim-at="0.55" data-anim-duration="0.5">That's a valid use of the water. Unless…</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="host-card-12"
+        class="card-host clip"
+        data-card-id="card-12"
+        data-start="198.6"
+        data-duration="14.366666666666667"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-12">
+          <style>
+            .card[data-card-id="card-12"] .root {
+              width: 100%; height: 100%;
+              display: flex; flex-direction: column; align-items: center; justify-content: center;
+              text-align: center; padding: 0 48px;
+              font-family: 'Nunito Sans', sans-serif;
+              background: rgba(27,42,59,0.55);
+            }
+            .card[data-card-id="card-12"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 24px; font-weight: 500; letter-spacing: 0.18em;
+              color: #5BCFEA; text-transform: uppercase; margin-bottom: 28px;
+            }
+            .card[data-card-id="card-12"] .number {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 200px; line-height: 1; color: #FFFFFF;
+              text-shadow: 0 0 60px rgba(77,217,192,0.45);
+            }
+            .card[data-card-id="card-12"] .suffix {
+              font-family: 'JetBrains Mono', monospace; font-weight: 700;
+              font-size: 56px; letter-spacing: 0.08em; color: #5BCFEA; margin-top: 4px;
+            }
+            .card[data-card-id="card-12"] .label {
+              font-family: 'Nunito Sans', sans-serif; font-weight: 400;
+              font-size: 34px; line-height: 1.4; color: #A8B8CC;
+              margin-top: 32px; max-width: 820px;
+            }
+            .card[data-card-id="card-12"] .rule {
+              width: 0; height: 4px; border-radius: 4px;
+              background: linear-gradient(90deg, #5BCFEA, #8B9FD4);
+              margin-top: 32px;
+            }
+          </style>
+          <div class="root">
+            <div class="kicker" id="card-12-kicker" data-anim="fade-in" data-anim-at="0.1" data-anim-duration="0.4">UNLESS…</div>
+            <div class="number" id="card-12-number" data-anim="scale-pop" data-anim-at="0.3" data-anim-duration="0.6">99%</div>
+            <div class="suffix" id="card-12-suffix" data-anim="fade-in" data-anim-at="0.9" data-anim-duration="0.4">→ ETHANOL</div>
+            <p class="label" id="card-12-label" data-anim="fade-in" data-anim-at="1.2" data-anim-duration="0.5">Only ~1% of that corn water is actually consumed as food.</p>
+            <div class="rule" id="card-12-rule" data-anim="grow-x" data-anim-at="1.4" data-anim-duration="0.5" data-anim-target-w="140"></div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="host-card-13"
+        class="card-host clip"
+        data-card-id="card-13"
+        data-start="213"
+        data-duration="19.966666666666665"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-13">
+          <style>
+            .card[data-card-id="card-13"] .root {
+              width: 100%; height: 100%;
+              display: flex; align-items: flex-end; justify-content: center;
+              padding: 0 32px 140px;
+              font-family: 'Nunito Sans', 'Inter', sans-serif;
+              background: transparent;
+            }
+            .card[data-card-id="card-13"] .panel {
+              width: 100%;
+              max-width: 1016px;
+              background: rgba(15,28,43,0.86);
+              border: 1px solid rgba(77,217,192,0.35);
+              border-radius: 16px;
+              padding: 32px 32px 36px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+              backdrop-filter: blur(10px);
+            }
+            .card[data-card-id="card-13"] .rule {
+              width: 0; height: 4px; border-radius: 4px;
+              background: linear-gradient(90deg, #8B9FD4, #8B9FD4);
+              margin-bottom: 16px;
+            }
+            .card[data-card-id="card-13"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 20px; font-weight: 500; letter-spacing: 0.14em;
+              color: #8B9FD4; text-transform: uppercase; margin-bottom: 14px;
+            }
+            .card[data-card-id="card-13"] .title {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 56px; line-height: 1.12; color: #FFFFFF; margin: 0 0 16px;
+            }
+            .card[data-card-id="card-13"] .detail {
+              font-family: 'Nunito Sans', sans-serif; font-weight: 400;
+              font-size: 32px; line-height: 1.45; color: #A8B8CC; margin: 0;
+            }
+          </style>
+          <div class="root">
+            <div class="panel">
+              <div class="rule" id="card-13-rule" data-anim="grow-x" data-anim-at="0.15" data-anim-duration="0.45" data-anim-target-w="120"></div>
+              <div class="kicker" id="card-13-kicker" data-anim="fade-in" data-anim-at="0.2" data-anim-duration="0.4">THE DOUBLE STANDARD</div>
+              <h1 class="title" id="card-13-title" data-anim="slide-in" data-anim-at="0.3" data-anim-duration="0.5" data-anim-from="bottom" data-anim-distance="24">Where's the corn outrage?</h1>
+              <p class="detail" id="card-13-detail" data-anim="fade-in" data-anim-at="0.55" data-anim-duration="0.5">If AI's water use bothers you this much, go ask a golf course what its water bill looks like.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="host-card-14"
+        class="card-host clip"
+        data-card-id="card-14"
+        data-start="233"
+        data-duration="14.866666666666667"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-14">
+          <style>
+            .card[data-card-id="card-14"] .root {
+              width: 100%; height: 100%;
+              display: flex; align-items: flex-end; justify-content: center;
+              padding: 0 32px 140px;
+              font-family: 'Nunito Sans', 'Inter', sans-serif;
+              background: transparent;
+            }
+            .card[data-card-id="card-14"] .panel {
+              width: 100%;
+              max-width: 1016px;
+              background: rgba(15,28,43,0.86);
+              border: 1px solid rgba(77,217,192,0.35);
+              border-radius: 16px;
+              padding: 32px 32px 36px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+              backdrop-filter: blur(10px);
+            }
+            .card[data-card-id="card-14"] .rule {
+              width: 0; height: 4px; border-radius: 4px;
+              background: linear-gradient(90deg, #5BCFEA, #8B9FD4);
+              margin-bottom: 16px;
+            }
+            .card[data-card-id="card-14"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 20px; font-weight: 500; letter-spacing: 0.14em;
+              color: #5BCFEA; text-transform: uppercase; margin-bottom: 14px;
+            }
+            .card[data-card-id="card-14"] .title {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 56px; line-height: 1.12; color: #FFFFFF; margin: 0 0 16px;
+            }
+            .card[data-card-id="card-14"] .detail {
+              font-family: 'Nunito Sans', sans-serif; font-weight: 400;
+              font-size: 32px; line-height: 1.45; color: #A8B8CC; margin: 0;
+            }
+          </style>
+          <div class="root">
+            <div class="panel">
+              <div class="rule" id="card-14-rule" data-anim="grow-x" data-anim-at="0.15" data-anim-duration="0.45" data-anim-target-w="120"></div>
+              <div class="kicker" id="card-14-kicker" data-anim="fade-in" data-anim-at="0.2" data-anim-duration="0.4">STILL FRESH</div>
+              <h1 class="title" id="card-14-title" data-anim="slide-in" data-anim-at="0.3" data-anim-duration="0.5" data-anim-from="bottom" data-anim-distance="24">This argument isn't dying down</h1>
+              <p class="detail" id="card-14-detail" data-anim="fade-in" data-anim-at="0.55" data-anim-duration="0.5">AI is still new — the takes will keep coming. Don't outsource your opinion to whoever sounds smart on TikTok. Even me.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="host-card-15"
+        class="card-host clip"
+        data-card-id="card-15"
+        data-start="247.9"
+        data-duration="13.633333333333333"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-15">
+          <style>
+            .card[data-card-id="card-15"] .root {
+              width: 100%; height: 100%;
+              display: flex; align-items: flex-end; justify-content: center;
+              padding: 0 32px 140px;
+              font-family: 'Nunito Sans', 'Inter', sans-serif;
+              background: transparent;
+            }
+            .card[data-card-id="card-15"] .panel {
+              width: 100%;
+              max-width: 1016px;
+              background: rgba(15,28,43,0.86);
+              border: 1px solid rgba(77,217,192,0.35);
+              border-radius: 16px;
+              padding: 32px 32px 36px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+              backdrop-filter: blur(10px);
+            }
+            .card[data-card-id="card-15"] .rule {
+              width: 0; height: 4px; border-radius: 4px;
+              background: linear-gradient(90deg, #4DD9C0, #8B9FD4);
+              margin-bottom: 16px;
+            }
+            .card[data-card-id="card-15"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 20px; font-weight: 500; letter-spacing: 0.14em;
+              color: #4DD9C0; text-transform: uppercase; margin-bottom: 14px;
+            }
+            .card[data-card-id="card-15"] .title {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 56px; line-height: 1.12; color: #FFFFFF; margin: 0 0 16px;
+            }
+            .card[data-card-id="card-15"] .detail {
+              font-family: 'Nunito Sans', sans-serif; font-weight: 400;
+              font-size: 32px; line-height: 1.45; color: #A8B8CC; margin: 0;
+            }
+          </style>
+          <div class="root">
+            <div class="panel">
+              <div class="rule" id="card-15-rule" data-anim="grow-x" data-anim-at="0.15" data-anim-duration="0.45" data-anim-target-w="120"></div>
+              <div class="kicker" id="card-15-kicker" data-anim="fade-in" data-anim-at="0.2" data-anim-duration="0.4">DO THE WORK</div>
+              <h1 class="title" id="card-15-title" data-anim="slide-in" data-anim-at="0.3" data-anim-duration="0.5" data-anim-from="bottom" data-anim-distance="24">Fact-check it yourself</h1>
+              <p class="detail" id="card-15-detail" data-anim="fade-in" data-anim-at="0.55" data-anim-duration="0.5">Go verify the numbers — don't just take a confident TikTok voice at its word.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="host-card-16"
+        class="card-host clip"
+        data-card-id="card-16"
+        data-start="261.53333333333336"
+        data-duration="6.233333333333333"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-16">
+          <style>
+            .card[data-card-id="card-16"] .root {
+              width: 100%; height: 100%;
+              display: flex; align-items: flex-end; justify-content: center;
+              padding: 0 32px 140px;
+              font-family: 'Nunito Sans', 'Inter', sans-serif;
+              background: transparent;
+            }
+            .card[data-card-id="card-16"] .panel {
+              width: 100%;
+              max-width: 1016px;
+              background: rgba(15,28,43,0.86);
+              border: 1px solid rgba(77,217,192,0.35);
+              border-radius: 16px;
+              padding: 32px 32px 36px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+              backdrop-filter: blur(10px);
+            }
+            .card[data-card-id="card-16"] .rule {
+              width: 0; height: 4px; border-radius: 4px;
+              background: linear-gradient(90deg, #8B9FD4, #8B9FD4);
+              margin-bottom: 16px;
+            }
+            .card[data-card-id="card-16"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 20px; font-weight: 500; letter-spacing: 0.14em;
+              color: #8B9FD4; text-transform: uppercase; margin-bottom: 14px;
+            }
+            .card[data-card-id="card-16"] .title {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 56px; line-height: 1.12; color: #FFFFFF; margin: 0 0 16px;
+            }
+            .card[data-card-id="card-16"] .detail {
+              font-family: 'Nunito Sans', sans-serif; font-weight: 400;
+              font-size: 32px; line-height: 1.45; color: #A8B8CC; margin: 0;
+            }
+          </style>
+          <div class="root">
+            <div class="panel">
+              <div class="rule" id="card-16-rule" data-anim="grow-x" data-anim-at="0.15" data-anim-duration="0.45" data-anim-target-w="120"></div>
+              <div class="kicker" id="card-16-kicker" data-anim="fade-in" data-anim-at="0.2" data-anim-duration="0.4">THE REAL RISK</div>
+              <h1 class="title" id="card-16-title" data-anim="slide-in" data-anim-at="0.3" data-anim-duration="0.5" data-anim-from="bottom" data-anim-distance="24">A couple bad apples</h1>
+              <p class="detail" id="card-16-detail" data-anim="fade-in" data-anim-at="0.55" data-anim-duration="0.5">Fast news is great — until misinformation from a few voices messes it up for everybody else.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="host-card-17"
+        class="card-host clip"
+        data-card-id="card-17"
+        data-start="267.76666666666665"
+        data-duration="2.3666666666666667"
+        data-track-index="2"
+        style="left:0;top:0;width:1080px;height:1920px;visibility:hidden;opacity:0;"
+      >
+        <div class="card" data-card-id="card-17">
+          <style>
+            .card[data-card-id="card-17"] .root {
+              width: 100%; height: 100%;
+              display: flex; flex-direction: column; align-items: center; justify-content: center;
+              text-align: center; background: #1B2A3B;
+              font-family: 'Nunito Sans', sans-serif;
+            }
+            .card[data-card-id="card-17"] .kicker {
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 22px; font-weight: 500; letter-spacing: 0.2em;
+              color: #4DD9C0; text-transform: uppercase; margin-bottom: 20px;
+            }
+            .card[data-card-id="card-17"] .word {
+              font-family: 'Nunito', sans-serif; font-weight: 900;
+              font-size: 76px; color: #FFFFFF;
+            }
+            .card[data-card-id="card-17"] .word .accent { color: #4DD9C0; }
+            .card[data-card-id="card-17"] .tagline {
+              font-family: 'Nunito Sans', sans-serif; font-weight: 400;
+              font-size: 28px; color: #A8B8CC; margin-top: 20px;
+            }
+            .card[data-card-id="card-17"] .rule {
+              width: 0; height: 4px; border-radius: 4px;
+              background: linear-gradient(90deg, #4DD9C0, #8B9FD4);
+              margin-bottom: 24px;
+            }
+          </style>
+          <div class="root">
+            <div class="kicker" id="card-17-kicker" data-anim="fade-in" data-anim-at="0.05" data-anim-duration="0.3">END RANT</div>
+            <div class="rule" id="card-17-rule" data-anim="grow-x" data-anim-at="0.3" data-anim-duration="0.4" data-anim-target-w="100"></div>
+            <div class="word" id="card-17-word" data-anim="scale-pop" data-anim-at="0.4" data-anim-duration="0.5">joe<span class="accent">Builds</span> systems</div>
+            <div class="tagline" id="card-17-tag" data-anim="fade-in" data-anim-at="0.9" data-anim-duration="0.4">Build the system. Every word counts.</div>
+          </div>
+        </div>
+      </div>
+
+      <script src="vendor/gsap.min.js"></script>
+      <script>
+        (function () {
+          window.__fmt = function (v, fmt) {
+            if (typeof fmt === "string" && /^\.[0-9]+f$/.test(fmt)) {
+              return Number(v).toFixed(Number(fmt.slice(1, -1)));
+            }
+            if (fmt === ",d") return Math.round(v).toLocaleString();
+            return String(Math.round(v));
+          };
+
+          const tl = window.gsap.timeline({ paused: true });
+
+          tl.set('.card-host[data-card-id="card-01"]', { visibility: "visible" }, 0.03333333333333333);
+          tl.fromTo('.card-host[data-card-id="card-01"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0.03333333333333333);
+          tl.fromTo('.card[data-card-id="card-01"] #card-01-rule', { width: 0 }, { width: 120, duration: 0.45, ease: "power2.out" }, 0.2);
+          tl.fromTo('.card[data-card-id="card-01"] #card-01-kicker', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0.23333333333333334);
+          tl.fromTo('.card[data-card-id="card-01"] #card-01-title', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.3333333333333333);
+          tl.fromTo('.card[data-card-id="card-01"] #card-01-detail', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 0.6);
+          tl.to('.card-host[data-card-id="card-01"]', { opacity: 0, duration: 0.35, ease: "power2.in" }, 22.1);
+          tl.set('.card-host[data-card-id="card-01"]', { opacity: 0 }, 22.466666666666665);
+          tl.set('.card-host[data-card-id="card-01"]', { visibility: "hidden" }, 22.466666666666665);
+          tl.set('.card-host[data-card-id="card-01"]', { opacity: 0 }, 22.5);
+
+          tl.set('.card-host[data-card-id="card-02"]', { visibility: "visible" }, 22.5);
+          tl.fromTo('.card-host[data-card-id="card-02"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 22.5);
+          tl.fromTo('.card[data-card-id="card-02"] #card-02-rule', { width: 0 }, { width: 120, duration: 0.45, ease: "power2.out" }, 22.666666666666668);
+          tl.fromTo('.card[data-card-id="card-02"] #card-02-kicker', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 22.7);
+          tl.fromTo('.card[data-card-id="card-02"] #card-02-title', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 22.8);
+          tl.fromTo('.card[data-card-id="card-02"] #card-02-detail', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 23.066666666666666);
+          tl.to('.card-host[data-card-id="card-02"]', { opacity: 0, duration: 0.35, ease: "power2.in" }, 30.933333333333334);
+          tl.set('.card-host[data-card-id="card-02"]', { opacity: 0 }, 31.266666666666666);
+          tl.set('.card-host[data-card-id="card-02"]', { visibility: "hidden" }, 31.266666666666666);
+          tl.set('.card-host[data-card-id="card-02"]', { opacity: 0 }, 31.333333333333332);
+
+          tl.set('.card-host[data-card-id="card-03"]', { visibility: "visible" }, 31.333333333333332);
+          tl.fromTo('.card-host[data-card-id="card-03"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 31.333333333333332);
+          tl.fromTo('.card[data-card-id="card-03"] #card-03-rule', { width: 0 }, { width: 120, duration: 0.45, ease: "power2.out" }, 31.466666666666665);
+          tl.fromTo('.card[data-card-id="card-03"] #card-03-kicker', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 31.533333333333335);
+          tl.fromTo('.card[data-card-id="card-03"] #card-03-title', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 31.633333333333333);
+          tl.fromTo('.card[data-card-id="card-03"] #card-03-detail', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 31.866666666666667);
+          tl.to('.card-host[data-card-id="card-03"]', { opacity: 0, duration: 0.35, ease: "power2.in" }, 37.36666666666667);
+          tl.set('.card-host[data-card-id="card-03"]', { opacity: 0 }, 37.733333333333334);
+          tl.set('.card-host[data-card-id="card-03"]', { visibility: "hidden" }, 37.733333333333334);
+          tl.set('.card-host[data-card-id="card-03"]', { opacity: 0 }, 37.766666666666666);
+
+          tl.set('.card-host[data-card-id="card-04"]', { visibility: "visible" }, 37.766666666666666);
+          tl.fromTo('.card-host[data-card-id="card-04"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 37.766666666666666);
+          tl.fromTo('.card[data-card-id="card-04"] #card-04-kicker', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 37.86666666666667);
+          tl.fromTo('.card[data-card-id="card-04"] #card-04-chip-0', { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }, 37.9);
+          tl.fromTo('.card[data-card-id="card-04"] #card-04-chip-1', { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }, 38.2);
+          tl.fromTo('.card[data-card-id="card-04"] #card-04-chip-2', { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }, 38.46666666666667);
+          tl.fromTo('.card[data-card-id="card-04"] #card-04-chip-3', { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }, 38.766666666666666);
+          tl.fromTo('.card[data-card-id="card-04"] #card-04-punch', { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.6)" }, 39.266666666666666);
+          tl.to('.card-host[data-card-id="card-04"]', { opacity: 0, duration: 0.35, ease: "power2.in" }, 54.86666666666667);
+          tl.set('.card-host[data-card-id="card-04"]', { opacity: 0 }, 55.2);
+          tl.set('.card-host[data-card-id="card-04"]', { visibility: "hidden" }, 55.2);
+          tl.set('.card-host[data-card-id="card-04"]', { opacity: 0 }, 55.233333333333334);
+
+          tl.set('.card-host[data-card-id="card-05"]', { visibility: "visible" }, 55.233333333333334);
+          tl.fromTo('.card-host[data-card-id="card-05"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 55.233333333333334);
+          tl.fromTo('.card[data-card-id="card-05"] #card-05-rule', { width: 0 }, { width: 120, duration: 0.45, ease: "power2.out" }, 55.4);
+          tl.fromTo('.card[data-card-id="card-05"] #card-05-kicker', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 55.43333333333333);
+          tl.fromTo('.card[data-card-id="card-05"] #card-05-title', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 55.53333333333333);
+          tl.fromTo('.card[data-card-id="card-05"] #card-05-detail', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 55.8);
+          tl.to('.card-host[data-card-id="card-05"]', { opacity: 0, duration: 0.35, ease: "power2.in" }, 89.6);
+          tl.set('.card-host[data-card-id="card-05"]', { opacity: 0 }, 89.96666666666667);
+          tl.set('.card-host[data-card-id="card-05"]', { visibility: "hidden" }, 89.96666666666667);
+          tl.set('.card-host[data-card-id="card-05"]', { opacity: 0 }, 90);
+
+          tl.set('.card-host[data-card-id="card-06"]', { visibility: "visible" }, 90);
+          tl.fromTo('.card-host[data-card-id="card-06"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 90);
+          tl.fromTo('.card[data-card-id="card-06"] #card-06-rule', { width: 0 }, { width: 120, duration: 0.45, ease: "power2.out" }, 90.16666666666667);
+          tl.fromTo('.card[data-card-id="card-06"] #card-06-kicker', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 90.2);
+          tl.fromTo('.card[data-card-id="card-06"] #card-06-title', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 90.3);
+          tl.fromTo('.card[data-card-id="card-06"] #card-06-detail', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 90.56666666666666);
+          tl.to('.card-host[data-card-id="card-06"]', { opacity: 0, duration: 0.35, ease: "power2.in" }, 108.13333333333334);
+          tl.set('.card-host[data-card-id="card-06"]', { opacity: 0 }, 108.46666666666667);
+          tl.set('.card-host[data-card-id="card-06"]', { visibility: "hidden" }, 108.46666666666667);
+          tl.set('.card-host[data-card-id="card-06"]', { opacity: 0 }, 108.53333333333333);
+
+          tl.set('.card-host[data-card-id="card-07"]', { visibility: "visible" }, 108.53333333333333);
+          tl.fromTo('.card-host[data-card-id="card-07"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 108.53333333333333);
+          tl.fromTo('.card[data-card-id="card-07"] #card-07-rule', { width: 0 }, { width: 120, duration: 0.45, ease: "power2.out" }, 108.66666666666667);
+          tl.fromTo('.card[data-card-id="card-07"] #card-07-kicker', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 108.73333333333333);
+          tl.fromTo('.card[data-card-id="card-07"] #card-07-title', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 108.83333333333333);
+          tl.fromTo('.card[data-card-id="card-07"] #card-07-detail', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 109.06666666666666);
+          tl.to('.card-host[data-card-id="card-07"]', { opacity: 0, duration: 0.35, ease: "power2.in" }, 117.46666666666667);
+          tl.set('.card-host[data-card-id="card-07"]', { opacity: 0 }, 117.8);
+          tl.set('.card-host[data-card-id="card-07"]', { visibility: "hidden" }, 117.8);
+          tl.set('.card-host[data-card-id="card-07"]', { opacity: 0 }, 117.83333333333333);
+
+          tl.set('.card-host[data-card-id="card-08"]', { visibility: "visible" }, 117.83333333333333);
+          tl.fromTo('.card-host[data-card-id="card-08"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 117.83333333333333);
+          tl.fromTo('.card[data-card-id="card-08"] #card-08-rule', { width: 0 }, { width: 120, duration: 0.45, ease: "power2.out" }, 118);
+          tl.fromTo('.card[data-card-id="card-08"] #card-08-kicker', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 118.03333333333333);
+          tl.fromTo('.card[data-card-id="card-08"] #card-08-title', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 118.13333333333334);
+          tl.fromTo('.card[data-card-id="card-08"] #card-08-detail', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 118.4);
+          tl.to('.card-host[data-card-id="card-08"]', { opacity: 0, duration: 0.35, ease: "power2.in" }, 155.13333333333333);
+          tl.set('.card-host[data-card-id="card-08"]', { opacity: 0 }, 155.46666666666667);
+          tl.set('.card-host[data-card-id="card-08"]', { visibility: "hidden" }, 155.46666666666667);
+
+          tl.set('.card-host[data-card-id="card-09"]', { visibility: "visible" }, 155.46666666666667);
+          tl.fromTo('.card-host[data-card-id="card-09"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 155.46666666666667);
+          tl.fromTo('.card[data-card-id="card-09"] #card-09-rule', { width: 0 }, { width: 120, duration: 0.45, ease: "power2.out" }, 155.63333333333333);
+          tl.fromTo('.card[data-card-id="card-09"] #card-09-kicker', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 155.66666666666666);
+          tl.fromTo('.card[data-card-id="card-09"] #card-09-title', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 155.76666666666668);
+          tl.fromTo('.card[data-card-id="card-09"] #card-09-detail', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 156.03333333333333);
+          tl.to('.card-host[data-card-id="card-09"]', { opacity: 0, duration: 0.35, ease: "power2.in" }, 168.9);
+          tl.set('.card-host[data-card-id="card-09"]', { opacity: 0 }, 169.26666666666668);
+          tl.set('.card-host[data-card-id="card-09"]', { visibility: "hidden" }, 169.26666666666668);
+          tl.set('.card-host[data-card-id="card-09"]', { opacity: 0 }, 169.3);
+
+          tl.set('.card-host[data-card-id="card-10"]', { visibility: "visible" }, 169.3);
+          tl.fromTo('.card-host[data-card-id="card-10"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 169.3);
+          tl.fromTo('.card[data-card-id="card-10"] #card-10-kicker', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 169.4);
+          (function(){ const o = { v: 0 }; const el = null; tl.to(o, { v: 20, duration: 1.1, ease: "power2.out", onUpdate: function(){ const node = document.querySelector('.card[data-card-id="card-10"] #card-10-number'); if (node) node.textContent = __fmt(o.v, ',d'); } }, 169.6); })();
+          tl.fromTo('.card[data-card-id="card-10"] #card-10-suffix', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 170.2);
+          tl.fromTo('.card[data-card-id="card-10"] #card-10-label', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 170.5);
+          tl.fromTo('.card[data-card-id="card-10"] #card-10-rule', { width: 0 }, { width: 140, duration: 0.5, ease: "power2.out" }, 170.7);
+          tl.to('.card-host[data-card-id="card-10"]', { opacity: 0, duration: 0.35, ease: "power2.in" }, 189.5);
+          tl.set('.card-host[data-card-id="card-10"]', { opacity: 0 }, 189.83333333333334);
+          tl.set('.card-host[data-card-id="card-10"]', { visibility: "hidden" }, 189.83333333333334);
+          tl.set('.card-host[data-card-id="card-10"]', { opacity: 0 }, 189.86666666666667);
+
+          tl.set('.card-host[data-card-id="card-11"]', { visibility: "visible" }, 189.86666666666667);
+          tl.fromTo('.card-host[data-card-id="card-11"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 189.86666666666667);
+          tl.fromTo('.card[data-card-id="card-11"] #card-11-rule', { width: 0 }, { width: 120, duration: 0.45, ease: "power2.out" }, 190.03333333333333);
+          tl.fromTo('.card[data-card-id="card-11"] #card-11-kicker', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 190.06666666666666);
+          tl.fromTo('.card[data-card-id="card-11"] #card-11-title', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 190.16666666666666);
+          tl.fromTo('.card[data-card-id="card-11"] #card-11-detail', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 190.43333333333334);
+          tl.to('.card-host[data-card-id="card-11"]', { opacity: 0, duration: 0.35, ease: "power2.in" }, 198.2);
+          tl.set('.card-host[data-card-id="card-11"]', { opacity: 0 }, 198.56666666666666);
+          tl.set('.card-host[data-card-id="card-11"]', { visibility: "hidden" }, 198.56666666666666);
+          tl.set('.card-host[data-card-id="card-11"]', { opacity: 0 }, 198.6);
+
+          tl.set('.card-host[data-card-id="card-12"]', { visibility: "visible" }, 198.6);
+          tl.fromTo('.card-host[data-card-id="card-12"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 198.6);
+          tl.fromTo('.card[data-card-id="card-12"] #card-12-kicker', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 198.7);
+          tl.fromTo('.card[data-card-id="card-12"] #card-12-number', { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.6)" }, 198.9);
+          tl.fromTo('.card[data-card-id="card-12"] #card-12-suffix', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 199.5);
+          tl.fromTo('.card[data-card-id="card-12"] #card-12-label', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 199.8);
+          tl.fromTo('.card[data-card-id="card-12"] #card-12-rule', { width: 0 }, { width: 140, duration: 0.5, ease: "power2.out" }, 200);
+          tl.to('.card-host[data-card-id="card-12"]', { opacity: 0, duration: 0.35, ease: "power2.in" }, 212.6);
+          tl.set('.card-host[data-card-id="card-12"]', { opacity: 0 }, 212.96666666666667);
+          tl.set('.card-host[data-card-id="card-12"]', { visibility: "hidden" }, 212.96666666666667);
+          tl.set('.card-host[data-card-id="card-12"]', { opacity: 0 }, 213);
+
+          tl.set('.card-host[data-card-id="card-13"]', { visibility: "visible" }, 213);
+          tl.fromTo('.card-host[data-card-id="card-13"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 213);
+          tl.fromTo('.card[data-card-id="card-13"] #card-13-rule', { width: 0 }, { width: 120, duration: 0.45, ease: "power2.out" }, 213.16666666666666);
+          tl.fromTo('.card[data-card-id="card-13"] #card-13-kicker', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 213.2);
+          tl.fromTo('.card[data-card-id="card-13"] #card-13-title', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 213.3);
+          tl.fromTo('.card[data-card-id="card-13"] #card-13-detail', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 213.56666666666666);
+          tl.to('.card-host[data-card-id="card-13"]', { opacity: 0, duration: 0.35, ease: "power2.in" }, 232.6);
+          tl.set('.card-host[data-card-id="card-13"]', { opacity: 0 }, 232.96666666666667);
+          tl.set('.card-host[data-card-id="card-13"]', { visibility: "hidden" }, 232.96666666666667);
+          tl.set('.card-host[data-card-id="card-13"]', { opacity: 0 }, 233);
+
+          tl.set('.card-host[data-card-id="card-14"]', { visibility: "visible" }, 233);
+          tl.fromTo('.card-host[data-card-id="card-14"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 233);
+          tl.fromTo('.card[data-card-id="card-14"] #card-14-rule', { width: 0 }, { width: 120, duration: 0.45, ease: "power2.out" }, 233.16666666666666);
+          tl.fromTo('.card[data-card-id="card-14"] #card-14-kicker', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 233.2);
+          tl.fromTo('.card[data-card-id="card-14"] #card-14-title', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 233.3);
+          tl.fromTo('.card[data-card-id="card-14"] #card-14-detail', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 233.56666666666666);
+          tl.to('.card-host[data-card-id="card-14"]', { opacity: 0, duration: 0.35, ease: "power2.in" }, 247.5);
+          tl.set('.card-host[data-card-id="card-14"]', { opacity: 0 }, 247.86666666666667);
+          tl.set('.card-host[data-card-id="card-14"]', { visibility: "hidden" }, 247.86666666666667);
+          tl.set('.card-host[data-card-id="card-14"]', { opacity: 0 }, 247.9);
+
+          tl.set('.card-host[data-card-id="card-15"]', { visibility: "visible" }, 247.9);
+          tl.fromTo('.card-host[data-card-id="card-15"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 247.9);
+          tl.fromTo('.card[data-card-id="card-15"] #card-15-rule', { width: 0 }, { width: 120, duration: 0.45, ease: "power2.out" }, 248.06666666666666);
+          tl.fromTo('.card[data-card-id="card-15"] #card-15-kicker', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 248.1);
+          tl.fromTo('.card[data-card-id="card-15"] #card-15-title', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 248.2);
+          tl.fromTo('.card[data-card-id="card-15"] #card-15-detail', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 248.46666666666667);
+          tl.to('.card-host[data-card-id="card-15"]', { opacity: 0, duration: 0.35, ease: "power2.in" }, 261.1666666666667);
+          tl.set('.card-host[data-card-id="card-15"]', { opacity: 0 }, 261.53333333333336);
+          tl.set('.card-host[data-card-id="card-15"]', { visibility: "hidden" }, 261.53333333333336);
+
+          tl.set('.card-host[data-card-id="card-16"]', { visibility: "visible" }, 261.53333333333336);
+          tl.fromTo('.card-host[data-card-id="card-16"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 261.53333333333336);
+          tl.fromTo('.card[data-card-id="card-16"] #card-16-rule', { width: 0 }, { width: 120, duration: 0.45, ease: "power2.out" }, 261.6666666666667);
+          tl.fromTo('.card[data-card-id="card-16"] #card-16-kicker', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 261.73333333333335);
+          tl.fromTo('.card[data-card-id="card-16"] #card-16-title', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 261.8333333333333);
+          tl.fromTo('.card[data-card-id="card-16"] #card-16-detail', { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, 262.06666666666666);
+          tl.to('.card-host[data-card-id="card-16"]', { opacity: 0, duration: 0.35, ease: "power2.in" }, 267.4);
+          tl.set('.card-host[data-card-id="card-16"]', { opacity: 0 }, 267.76666666666665);
+          tl.set('.card-host[data-card-id="card-16"]', { visibility: "hidden" }, 267.76666666666665);
+
+          tl.set('.card-host[data-card-id="card-17"]', { visibility: "visible" }, 267.76666666666665);
+          tl.fromTo('.card-host[data-card-id="card-17"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 267.76666666666665);
+          tl.fromTo('.card[data-card-id="card-17"] #card-17-kicker', { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 267.8);
+          tl.fromTo('.card[data-card-id="card-17"] #card-17-rule', { width: 0 }, { width: 100, duration: 0.4, ease: "power2.out" }, 268.06666666666666);
+          tl.fromTo('.card[data-card-id="card-17"] #card-17-word', { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.6)" }, 268.1666666666667);
+          tl.fromTo('.card[data-card-id="card-17"] #card-17-tag', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 268.6666666666667);
+
+          tl.to('#video-wrap', { opacity: 0, duration: 0.4, ease: "power2.in" }, 267.76666666666665);
+
+          window.__timelines = window.__timelines || {};
+          window.__timelines["talking-head-recut"] = tl;
+        })();
+      </script>
+    </div>
+  </body>
+</html>

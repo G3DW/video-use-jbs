@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1920">
+    <title>Animated Captions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 1080px;
+            height: 1920px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+
+        .caption-container {
+            width: 90%;
+            max-width: 972px; /* 90% of 1080 */
+            text-align: center;
+            padding: 40px;
+        }
+
+        .word {
+            display: inline-block;
+            font-size: 72px;
+            font-weight: 800;
+            color: #FFFFFF;
+            text-shadow:
+                2px 2px 4px rgba(0, 0, 0, 0.9),
+                0 0 20px rgba(0, 0, 0, 0.5);
+            margin: 0 8px 16px 8px;
+            opacity: 0;
+            transform: scale(0.8);
+            transform-origin: center;
+            line-height: 1.2;
+            position: relative;
+            transition: opacity 0.1s ease-out;
+        }
+
+        .word.active {
+            opacity: 1 !important;
+            transform: scale(1);
+        }
+
+        .word.active .highlight {
+            opacity: 1;
+            transform: scaleX(1);
+        }
+
+        .word.past {
+            opacity: 0.5;
+        }
+
+        .highlight {
+            position: absolute;
+            bottom: 8px;
+            left: -4px;
+            right: -4px;
+            height: 24px;
+            background: #FFEB3B;
+            z-index: -1;
+            opacity: 0;
+            transform: scaleX(0);
+            transform-origin: left;
+            border-radius: 4px;
+        }
+
+        /* Punctuation stays with word */
+        .punctuation {
+            margin-left: -4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="caption-container" id="captionContainer"></div>
+
+    <script>
+        // Word timing data will be injected here
+        const WORDS = {{WORDS_DATA}};
+        const DURATION = {{DURATION}};
+        const FPS = 30;
+
+        const container = document.getElementById('captionContainer');
+        let currentWordIndex = 0;
+        let animationFrameId = null;
+        let startTime = null;
+
+        // Create DOM elements for all words
+        function initializeWords() {
+            container.innerHTML = '';
+
+            WORDS.forEach((wordData, index) => {
+                const wordSpan = document.createElement('span');
+                wordSpan.className = 'word';
+                wordSpan.setAttribute('data-index', index);
+                wordSpan.innerHTML = `
+                    <span class="highlight"></span>
+                    ${wordData.text}
+                `;
+                container.appendChild(wordSpan);
+            });
+        }
+
+        // Animate words based on timestamp
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const elapsed = (timestamp - startTime) / 1000; // Convert to seconds
+
+            // Update word states
+            WORDS.forEach((wordData, index) => {
+                const wordElement = container.querySelector(`[data-index="${index}"]`);
+                if (!wordElement) return;
+
+                const wordStart = wordData.start;
+                const wordEnd = wordData.end;
+
+                if (elapsed >= wordStart && elapsed < wordEnd) {
+                    // Current word - highlight
+                    wordElement.classList.add('active');
+                    wordElement.classList.remove('past');
+                } else if (elapsed >= wordEnd) {
+                    // Past word - dim
+                    wordElement.classList.remove('active');
+                    wordElement.classList.add('past');
+                } else {
+                    // Future word - hidden
+                    wordElement.classList.remove('active', 'past');
+                }
+            });
+
+            // Continue animation
+            if (elapsed < DURATION) {
+                animationFrameId = requestAnimationFrame(animate);
+            } else {
+                // Animation complete - all words visible and dimmed
+                container.querySelectorAll('.word').forEach(el => {
+                    el.classList.add('past');
+                    el.classList.remove('active');
+                });
+            }
+        }
+
+        // Initialize and start
+        initializeWords();
+
+        // Start animation immediately for HyperFrames capture
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>

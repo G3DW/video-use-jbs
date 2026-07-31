@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 3,
+  "composition": {
+    "fps": 30,
+    "width": 1080,
+    "height": 1920,
+    "durationSeconds": 270.14,
+    "layout": "portrait",
+    "themeId": "slate",
+    "seed": 27
+  },
+  "videoTrack": {
+    "sourcePath": "input-video.mp4",
+    "startSec": 0,
+    "endSec": 270.14,
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 1080,
+      "height": 1920
+    }
+  },
+  "subtitles": {
+    "enabled": false
+  },
+  "cards": [
+    {
+      "id": "card-01",
+      "intent": "Hook: the water argument, do your homework",
+      "startSec": 0.04,
+      "endSec": 22.45,
+      "accentIndex": 0,
+      "zone": "video-overlay",
+      "contentHints": {}
+    },
+    {
+      "id": "card-02",
+      "intent": "You cant say both — logic gap",
+      "startSec": 22.5,
+      "endSec": 31.28,
+      "accentIndex": 1,
+      "zone": "video-overlay",
+      "contentHints": {}
+    },
+    {
+      "id": "card-03",
+      "intent": "Data centers arent new",
+      "startSec": 31.32,
+      "endSec": 37.72,
+      "accentIndex": 1,
+      "zone": "video-overlay",
+      "contentHints": {}
+    },
+    {
+      "id": "card-04",
+      "intent": "List: FB/IG/TikTok -> data center, point is moot",
+      "startSec": 37.76,
+      "endSec": 55.2,
+      "accentIndex": 0,
+      "zone": "video-overlay",
+      "contentHints": {}
+    },
+    {
+      "id": "card-05",
+      "intent": "MLB deadline flyer story",
+      "startSec": 55.24,
+      "endSec": 89.96,
+      "accentIndex": 2,
+      "zone": "video-overlay",
+      "contentHints": {}
+    },
+    {
+      "id": "card-06",
+      "intent": "13yr designer, AI didnt replace creativity",
+      "startSec": 90,
+      "endSec": 108.48,
+      "accentIndex": 0,
+      "zone": "video-overlay",
+      "contentHints": {}
+    },
+    {
+      "id": "card-07",
+      "intent": "Monotonous stuff is where AI helps",
+      "startSec": 108.52,
+      "endSec": 117.8,
+      "accentIndex": 0,
+      "zone": "video-overlay",
+      "contentHints": {}
+    },
+    {
+      "id": "card-08",
+      "intent": "Kinkos bottles of water jab",
+      "startSec": 117.84,
+      "endSec": 155.47,
+      "accentIndex": 1,
+      "zone": "video-overlay",
+      "contentHints": {}
+    },
+    {
+      "id": "card-09",
+      "intent": "Cloud = data center, same thing",
+      "startSec": 155.47,
+      "endSec": 169.26,
+      "accentIndex": 2,
+      "zone": "video-overlay",
+      "contentHints": {}
+    },
+    {
+      "id": "card-10",
+      "intent": "HERO: 20 trillion gallons corn production",
+      "startSec": 169.3,
+      "endSec": 189.84,
+      "accentIndex": 0,
+      "zone": "video-overlay",
+      "contentHints": {}
+    },
+    {
+      "id": "card-11",
+      "intent": "Fair enough — valid use of water",
+      "startSec": 189.88,
+      "endSec": 198.56,
+      "accentIndex": 0,
+      "zone": "video-overlay",
+      "contentHints": {}
+    },
+    {
+      "id": "card-12",
+      "intent": "HERO: 99% -> ethanol, 1% consumed",
+      "startSec": 198.6,
+      "endSec": 212.96,
+      "accentIndex": 1,
+      "zone": "video-overlay",
+      "contentHints": {}
+    },
+    {
+      "id": "card-13",
+      "intent": "Double standard: golf course water bill",
+      "startSec": 213,
+      "endSec": 232.96,
+      "accentIndex": 2,
+      "zone": "video-overlay",
+      "contentHints": {}
+    },
+    {
+      "id": "card-14",
+      "intent": "Argument not dying down, dont trust TikTok experts",
+      "startSec": 233,
+      "endSec": 247.86,
+      "accentIndex": 1,
+      "zone": "video-overlay",
+      "contentHints": {}
+    },
+    {
+      "id": "card-15",
+      "intent": "Fact-check it yourself",
+      "startSec": 247.9,
+      "endSec": 261.53,
+      "accentIndex": 0,
+      "zone": "video-overlay",
+      "contentHints": {}
+    },
+    {
+      "id": "card-16",
+      "intent": "Bad apples / misinformation risk",
+      "startSec": 261.53,
+      "endSec": 267.76,
+      "accentIndex": 2,
+      "zone": "video-overlay",
+      "contentHints": {}
+    },
+    {
+      "id": "card-17",
+      "intent": "OUTRO: joeBuilds systems sting",
+      "startSec": 267.76,
+      "endSec": 270.14,
+      "accentIndex": 0,
+      "zone": "video-overlay",
+      "contentHints": {}
+    }
+  ]
+}

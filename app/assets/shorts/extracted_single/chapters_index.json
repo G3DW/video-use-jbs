@@ -1,0 +1,35 @@
+[
+  {
+    "number": 1,
+    "title": "Intro",
+    "slug": "intro",
+    "start_time": 0,
+    "end_time": 536,
+    "duration": 536,
+    "audio_file": "shorts/extracted_single/01-intro-0-00-to-8-56.m4a",
+    "transcript_file": "shorts/extracted_single/01-intro-transcript.json",
+    "filename_base": "01-intro-0-00-to-8-56"
+  },
+  {
+    "number": 2,
+    "title": "How Distillation Works",
+    "slug": "how-distillation-works",
+    "start_time": 536,
+    "end_time": 701,
+    "duration": 165,
+    "audio_file": "shorts/extracted_single/02-how-distillation-works-8-56-to-11-41.m4a",
+    "transcript_file": "shorts/extracted_single/02-how-distillation-works-transcript.json",
+    "filename_base": "02-how-distillation-works-8-56-to-11-41"
+  },
+  {
+    "number": 3,
+    "title": "The Pricing War",
+    "slug": "the-pricing-war",
+    "start_time": 701,
+    "end_time": 2189.374,
+    "duration": 1488.3739999999998,
+    "audio_file": "shorts/extracted_single/03-the-pricing-war-11-41-to-36-29.m4a",
+    "transcript_file": "shorts/extracted_single/03-the-pricing-war-transcript.json",
+    "filename_base": "03-the-pricing-war-11-41-to-36-29"
+  }
+]

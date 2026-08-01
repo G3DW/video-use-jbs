@@ -55,16 +55,23 @@
 
 ## Video Description Template
 
+Structure modeled on Sabrina Ramonov's YouTube descriptions (algo-friendly alt titles + hashtags + link up top): hashtags → newsletter CTA → optional "Featuring" line for guest interviews → title → hook summary → key-point arrows → subscribe CTA → chapters → "Alternative Titles for the algo" → hashtags again → closing bio + CTA.
+
 ```
+#AI #ArtificialIntelligence #TechNews
+
+Get free AI playbooks & automations 👉 https://weekly.joebuildsai.com
+
+Moonshot AI vs. Anthropic: Inside the Claude Distillation Allegations
+
 In this deep dive, we explore the explosive allegations that China's Moonshot AI executed a massive industrial-scale extraction of Anthropic's Claude Fable 5 to build their Kimi K3 model. We break down the technical mechanics of AI distillation, the pricing war reshaping the market, and practical strategies solo developers can use to slash operational costs.
 
-Key Topics:
-• The White House accusations and evidence
-• How AI distillation works (the "French toast" analogy)
-• The pricing collapse: $50 → $0.87 per million tokens
-• Micro-distillation case study: GIA's $3 solution
-• System prompts and the operator framework
-• Operational portability in a shifting AI landscape
+→ The White House accusations and evidence
+→ How AI distillation works (the "French toast" analogy)
+→ The pricing collapse: $50 → $0.87 per million tokens
+→ Micro-distillation case study: GIA's $3 solution
+→ System prompts and the operator framework
+→ Operational portability in a shifting AI landscape
 
 Sources Referenced:
 • Ryan Greenblatt (Redwood Research) - Honeypot testing
@@ -72,7 +79,9 @@ Sources Referenced:
 • Dan Martell - Doer to Operator framework
 • Kevin Stratvert - Claude Artifacts demonstration
 
-Chapters:
+Hit like, subscribe, and turn on notifications for daily AI breakdowns.
+
+⏱️ Chapters
 00:00 - Intro
 08:56 - How Distillation Works
 11:41 - The Pricing War
@@ -81,7 +90,18 @@ Chapters:
 29:02 - Operational Portability Strategy
 33:03 - Recap
 
-#AI #ArtificialIntelligence #Distillation #TechNews #AIEconomics #SoloDeveloper
+Alternative Titles for the algo:
+• China's Moonshot AI Allegedly Stole Claude to Build Kimi K3
+• The AI Distillation Scandal Rocking the Model Pricing War
+• How Solo Developers Can Cut AI Costs Using Micro-Distillation
+
+#AI #ArtificialIntelligence #TechNews
+
+--
+
+I'm Joe. I build AI agent systems in public at joeBuilds Systems: daily breakdowns of what's actually working (and breaking) in AI agents, coding tools, and automation, for solo builders and small teams who don't have time to track it all themselves.
+
+Get more free AI breakdowns & automations 👉 https://weekly.joebuildsai.com
 ```
 
 ---

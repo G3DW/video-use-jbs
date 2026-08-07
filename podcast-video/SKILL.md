@@ -261,10 +261,12 @@ The daily episodes are NotebookLM-generated two-speaker dialogue audio (the raw 
 
 7. Blog repurposing (mandatory, every episode — see "Blog Repurposing
    (Beehiiv)" below): draft a companion blog post from transcript.md +
-   brief.md + the underlying Raw/niche-pulse research note, run it through
-   no-ai-slop (including an explicit em-dash count check), pick 2-4
-   content tags, and save it as a Beehiiv draft (or reviewable markdown,
-   until the plan supports learn_post_authoring) — never auto-published.
+   brief.md + the underlying Raw/niche-pulse research note, generate a
+   dedicated SEO meta title/description (see "SEO Meta" within that
+   section), run it through no-ai-slop (including an explicit em-dash
+   count check), pick 2-4 content tags, and save it as a Beehiiv draft (or
+   reviewable markdown, until the plan supports learn_post_authoring) —
+   never auto-published.
 ```
 
 For single-narrator episodes (no diarized dialogue to regenerate), skip step 1 and run `build_video.py` directly on the raw audio, same as before.
@@ -337,7 +339,23 @@ Added 2026-08-06. Every episode also gets repurposed into a blog post on the Joe
 6. Companion-episode line linking back to the YouTube video — **the real link can't be filled in until after upload**, since this step runs before that in the pipeline (not an issue for backfills, where the video's already live and the real URL should be looked up, e.g. via the `youtube-search` skill, rather than left as a placeholder); leave an explicit `[PASTE YOUTUBE LINK HERE ONCE UPLOADED]` placeholder only when the episode genuinely hasn't published yet
 7. Closing CTA links to `joebuildsai.com` (the main site), not `weekly.joebuildsai.com` — linking a newsletter-hosted post back to its own newsletter signup is circular
 
-**Title:** reuse the same hook-generation process as the YouTube title (see "YouTube Title" above) — same winning title on both, since it's already been optimized for CTR + SEO and duplicating it here reinforces the same search term instead of splitting it.
+**Title:** reuse the same hook-generation process as the YouTube title (see "YouTube Title" above) — same winning title on both, since it's already been optimized for CTR + SEO and duplicating it here reinforces the same search term instead of splitting it. This is the page H1/on-page title, not the meta title (see "SEO Meta" immediately below) — the two serve different jobs and should say different things.
+
+**SEO Meta** (added 2026-08-07, mandatory every post): generate a dedicated meta title and meta description for Beehiiv's SEO settings, distinct from the on-page H1/subtitle above — the H1 is what a reader sees on the page, the meta title/description are what Google's SERP and AI-crawler snippets actually show, and they have their own character budgets and framing needs.
+- **Meta title: 60 character limit.** Front-load the primary keyword (the tool/product name) and, where the episode supports it, a high-intent comparison or modifier term people actually search (e.g. "vs Claude Code," "pricing," "review") rather than a clever-but-keyword-empty phrase. Should differ in wording from the on-page title so the two don't cannibalize the same SERP real estate.
+- **Meta description: 145 character limit.** Lead with the concrete hook (the stat, the catch, the surprising mechanism), cover secondary keywords the title didn't fit, and close on an extractable answer-style clause — this is prime AEO real estate for answer-engine snippet pulls.
+- Draft 2-3 candidate pairs, pick the strongest by the same CTR + keyword-match logic as "YouTube Title" above, and write the winner (plus alternates) into a `## SEO Meta` block in `blog_post_draft.md`, directly under the `**Tags:**` line — e.g.:
+  ```
+  ## SEO Meta (for Beehiiv SEO settings — not the page title/subtitle above)
+
+  **Meta Title (60 char limit):** ...
+  **Meta Description (145 char limit):** ...
+
+  Alternates:
+  - Title: ... (NN)
+  - Description: ... (NN)
+  ```
+- When the post is eventually pushed live via `save_post`, pass the winning pair as `seo_settings.default_title` / `seo_settings.default_description` so the SERP metadata matches what was authored here rather than falling back to the post title/body.
 
 **Mandatory no-ai-slop pass, with an explicit em-dash count check:** run the drafted post through `no-ai-slop` same as the title. Pattern-scanning alone isn't enough — explicitly count em dashes (`grep -o '—' <file> | wc -l`) and get it to 0-1 for a post this length. The 2026-08-06 sample draft had 30 on first pass (missed on a pattern-only scan) and needed a dedicated count-and-fix pass, converting each to whatever it was actually doing: colons for label/list intros, parentheses for true asides, periods where it was just glue holding two sentences together.
 
@@ -457,5 +475,5 @@ Built on the `video-use` framework. Uses:
 
 ---
 
-**Version:** 1.0.0
-**Last Updated:** 2026-07-24
+**Version:** 1.3.0
+**Last Updated:** 2026-08-07

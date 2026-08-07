@@ -1,0 +1,119 @@
+{
+  "_readme": "Phrase bank for humanize_transcript.py. Each key is a category; 'detect' is a list of case-insensitive regex patterns matched against the raw NotebookLM transcript text (matches are resolved earliest-first, no overlaps); 'alternatives' is the rotation pool a replacement is drawn from. 'template: true' categories use a named capture group ('ask' for cta_outro) that gets spliced into the chosen alternative via {ask} — this preserves the per-episode-specific content (e.g. which comment to leave) while only varying the fixed frame around it. Keep every alternative in the same register as the show: casual, informed, a little wry co-host banter — never formal or robotic, that defeats the point.",
+
+  "opening_energizer": {
+    "detect": ["let'?s get into it\\.?"],
+    "alternatives": [
+      "Here we go.",
+      "Let's dig in.",
+      "Alright, let's get into the details.",
+      "Let's break it down.",
+      "Okay, here's the story.",
+      "Let's get into the weeds on this.",
+      "Alright, let's go.",
+      "Okay, let's dive in."
+    ]
+  },
+
+  "unpack_transition": {
+    "detect": ["(okay,?\\s+)?let'?s unpack this\\.?"],
+    "alternatives": [
+      "Right, let's dig in.",
+      "Okay, here's where it gets good.",
+      "Let's break this down.",
+      "So let's get into the mechanics of this.",
+      "Here's the interesting part.",
+      "Let's pull this apart a bit.",
+      "Okay, walk me through it.",
+      "So let's actually get into it."
+    ]
+  },
+
+  "pushback_transition": {
+    "detect": [
+      "let me push back( on that)?( for a (second|bit|moment))?",
+      "i wanna push back( a bit| on that)?",
+      "i want to push back( a bit| on that)?"
+    ],
+    "alternatives": [
+      "let me poke a hole in that",
+      "can I play devil's advocate for a second",
+      "hang on, let me stress-test that",
+      "okay but let me challenge that",
+      "let me throw a wrench in that for a second",
+      "I've gotta push back here though",
+      "wait, let me argue the other side of this",
+      "okay, let me be the skeptic for a second"
+    ]
+  },
+
+  "bridge_transition": {
+    "detect": ["which brings us (directly )?to"],
+    "alternatives": [
+      "That leads right into",
+      "Which rolls into",
+      "So naturally that lands us on",
+      "And that sets up",
+      "That's basically the segue into",
+      "Which loops us around to",
+      "So that pushes us toward"
+    ]
+  },
+
+  "meaning_pivot": {
+    "detect": ["so what does this all mean( for you)?\\??"],
+    "alternatives": [
+      "So bottom line, what do you actually do with this?",
+      "Okay, so how does this hit your day-to-day?",
+      "So what's the actual takeaway here?",
+      "So zooming out, what changes for you?",
+      "Alright, so what's the move here?",
+      "So practically speaking, what now?",
+      "So what's the real-world play here?"
+    ]
+  },
+
+  "closer": {
+    "detect": ["something to mull over", "something to think about"],
+    "alternatives": [
+      "Food for thought.",
+      "Chew on that for a bit.",
+      "Sit with that one for a second.",
+      "That's the open question.",
+      "Worth turning over in your head.",
+      "That's the thread to pull on.",
+      "Make of that what you will.",
+      "Something worth sitting with."
+    ]
+  },
+
+  "audience_address": {
+    "detect": [
+      "(you,\\s*)?(the\\s+)?solo creators? or (a\\s+)?small business owners?"
+    ],
+    "alternatives": [
+      "you, running things solo or with a lean team",
+      "you, whether you're a one-person shop or a small team",
+      "you, the independent operator",
+      "you, if you're building this largely on your own",
+      "you, running lean without a big team behind you",
+      "you, whether that's solo or a small crew"
+    ]
+  },
+
+  "cta_outro": {
+    "template": true,
+    "detect": [
+      "drop a like,\\s*(?P<ask>.*?),\\s*and subscribe so you don'?t miss tomorrow'?s? episode\\.?\\s*see you next time\\.?"
+    ],
+    "alternatives": [
+      "If that was useful, smash like, {ask}, and hit subscribe so tomorrow's episode lands in your feed. Catch you next time.",
+      "Give it a like if this helped, {ask}, and subscribe — we're back tomorrow. See you then.",
+      "Enjoyed this one? Drop a like, {ask}, and subscribe so you don't miss the next one. Until next time.",
+      "If this was worth your time, like it, {ask}, and hit that subscribe button for tomorrow's episode. See you soon.",
+      "Like this if it landed, {ask}, and subscribe so tomorrow's drop doesn't slip past you. Catch you next time.",
+      "If you got something out of this, drop a like, {ask}, and subscribe — new episode tomorrow. See you then.",
+      "If this was helpful, go ahead and like it, {ask}, and subscribe so you catch tomorrow's episode. Talk soon."
+    ]
+  }
+}

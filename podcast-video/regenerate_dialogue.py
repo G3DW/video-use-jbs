@@ -74,27 +74,48 @@ def main():
     parser.add_argument("--female-voice-id", default=DEFAULT_FEMALE_VOICE_ID)
     parser.add_argument("--model-id", default="eleven_v3")
     parser.add_argument("--speed", type=float, default=1.1)
+    parser.add_argument("--transcript", default=None,
+                         help="Reuse an already-transcribed (optionally humanized) transcript JSON "
+                              "instead of re-transcribing the raw audio. Stage 1 already produces this "
+                              "at edit/source_transcript/transcripts/<stem>.json (run through "
+                              "humanize_transcript.py) — pass it here to skip the redundant Scribe call.")
+    parser.add_argument("--speaker-map", default=None,
+                         help="Reuse an already-computed speaker_map.json instead of re-running pitch "
+                              "detection. Pairs with --transcript — both come from the same Stage 1 run.")
     args = parser.parse_args()
 
     audio_path = Path(args.audio).resolve()
     out_dir = Path(args.out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. Transcribe raw source (diarized, word-level, audio events)
-    print("[1/3] Transcribing raw episode audio...", file=sys.stderr)
-    transcribe_edit_dir = out_dir / "source_transcript"
-    run([str(VENV_PYTHON), str(TRANSCRIBE_SCRIPT), str(audio_path),
-         "--edit-dir", str(transcribe_edit_dir), "--num-speakers", "2"])
-    transcript_json = transcribe_edit_dir / "transcripts" / f"{audio_path.stem}.json"
-    if not transcript_json.exists():
-        sys.exit(f"[error] expected transcript not found: {transcript_json}")
+    if args.transcript:
+        # Reuse Stage 1's transcript (humanized or raw) instead of re-transcribing.
+        transcript_json = Path(args.transcript).resolve()
+        if not transcript_json.exists():
+            sys.exit(f"[error] --transcript path not found: {transcript_json}")
+        print(f"[1/3] Reusing existing transcript: {transcript_json}", file=sys.stderr)
+    else:
+        # 1. Transcribe raw source (diarized, word-level, audio events)
+        print("[1/3] Transcribing raw episode audio...", file=sys.stderr)
+        transcribe_edit_dir = out_dir / "source_transcript"
+        run([str(VENV_PYTHON), str(TRANSCRIBE_SCRIPT), str(audio_path),
+             "--edit-dir", str(transcribe_edit_dir), "--num-speakers", "2"])
+        transcript_json = transcribe_edit_dir / "transcripts" / f"{audio_path.stem}.json"
+        if not transcript_json.exists():
+            sys.exit(f"[error] expected transcript not found: {transcript_json}")
 
-    # 2. Detect which diarized speaker is male vs female
-    print("[2/3] Detecting speaker gender via pitch analysis...", file=sys.stderr)
-    speaker_map_path = out_dir / "speaker_map.json"
-    run([str(VENV_PYTHON), str(SCRIPT_DIR / "detect_speaker_gender.py"),
-         "--transcript", str(transcript_json), "--audio", str(audio_path),
-         "--output", str(speaker_map_path)])
+    if args.speaker_map:
+        speaker_map_path = Path(args.speaker_map).resolve()
+        if not speaker_map_path.exists():
+            sys.exit(f"[error] --speaker-map path not found: {speaker_map_path}")
+        print(f"[2/3] Reusing existing speaker map: {speaker_map_path}", file=sys.stderr)
+    else:
+        # 2. Detect which diarized speaker is male vs female
+        print("[2/3] Detecting speaker gender via pitch analysis...", file=sys.stderr)
+        speaker_map_path = out_dir / "speaker_map.json"
+        run([str(VENV_PYTHON), str(SCRIPT_DIR / "detect_speaker_gender.py"),
+             "--transcript", str(transcript_json), "--audio", str(audio_path),
+             "--output", str(speaker_map_path)])
     speaker_map = json.loads(speaker_map_path.read_text())
     male_speaker = speaker_map["male_speaker"]
     female_speaker = speaker_map["female_speaker"]

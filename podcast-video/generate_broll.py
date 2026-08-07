@@ -153,7 +153,8 @@ def stage(args):
         shutil.copy(f, public / "fonts" / f.name)
     shutil.copy(ASSETS_DIR / "vendor" / "gsap.min.js", public / "vendor" / "gsap.min.js")
     for f in (ASSETS_DIR / "images").glob("*"):
-        shutil.copy(f, public / "images" / f.name)
+        if f.is_file():
+            shutil.copy(f, public / "images" / f.name)
     print(f"[info] staged fonts/vendor/images -> {public}")
 
     video_path = Path(args.video)
@@ -470,6 +471,39 @@ def build_thesis(card, accent, W, H=1080):
     return card_shell(cid, style_extra, body, accent)
 
 
+def build_slide_cutaway(card, accent, W, H=1080):
+    """Fullscreen cutaway showing a static reference slide (e.g. a NotebookLM-
+    generated deck image covering the same source material as the episode
+    audio) with a caption strip pinned to the bottom. contentHints: image
+    (path under public/, e.g. "images/notebooklm-slides/foo.png"), caption.
+    Pair with zone: "fullscreen" in the storyboard so the talking-head video
+    fades out underneath instead of showing through."""
+    cid = card["id"]
+    h = card["contentHints"]
+    return f'''<div class="card" data-card-id="{cid}">
+  <style>
+    .card[data-card-id="{cid}"] .root {{
+      width: 100%; height: 100%; position: relative; font-family: 'Inter', sans-serif;
+      background: #0B121C;
+    }}
+    .card[data-card-id="{cid}"] .slide {{
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+    }}
+    .card[data-card-id="{cid}"] .caption-bar {{
+      position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 90px;
+      background: rgba(15,28,43,0.92); border-top: 2px solid var(--accent-{accent});
+      font-family: 'Inter', sans-serif; font-size: 30px; color: #FFFFFF; font-weight: 600;
+    }}
+  </style>
+  <div class="root">
+
+    <img class="slide" id="{cid}-slide" src="{esc(h['image'])}" data-anim="fade-in" data-anim-at="0.05" data-anim-duration="0.3" />
+    <div class="caption-bar" id="{cid}-caption" data-anim="fade-in" data-anim-at="0.25" data-anim-duration="0.3">{esc(h['caption'])}</div>
+
+  </div>
+</div>'''
+
+
 def build_outro(card, accent, W, H=1080):
     cid = card["id"]
     h = card["contentHints"]
@@ -596,6 +630,7 @@ BUILDERS = {
     "outro": build_outro,
     "icon-badge": build_icon_badge,
     "chat-sim": build_chat_sim,
+    "slide-cutaway": build_slide_cutaway,
 }
 
 
@@ -632,6 +667,9 @@ def card_gsap(card, fps):
     elif arch == "outro":
         lines.append(f"          tl.fromTo('.card[data-card-id=\"{cid}\"] #{cid}-wordmark', {{opacity:0}}, {{opacity:1, duration:0.4, ease:'power2.out'}}, {q(start+0.1, fps)});")
         lines.append(f"          tl.fromTo('.card[data-card-id=\"{cid}\"] #{cid}-tagline', {{opacity:0}}, {{opacity:1, duration:0.35, ease:'power2.out'}}, {q(start+0.4, fps)});")
+    elif arch == "slide-cutaway":
+        lines.append(f"          tl.fromTo('.card[data-card-id=\"{cid}\"] #{cid}-slide', {{opacity:0, scale:1.03}}, {{opacity:1, scale:1, duration:0.4, ease:'power2.out'}}, {q(start+0.05, fps)});")
+        lines.append(f"          tl.fromTo('.card[data-card-id=\"{cid}\"] #{cid}-caption', {{opacity:0, y:14}}, {{opacity:1, y:0, duration:0.3, ease:'power2.out'}}, {q(start+0.25, fps)});")
     elif arch == "icon-badge":
         lines.append(f"          tl.fromTo('.card[data-card-id=\"{cid}\"] #{cid}-badge', {{scale:0}}, {{scale:1, duration:0.3, ease:'back.out(2.2)'}}, {q(start+0.05, fps)});")
         lines.append(f"          tl.to('.card[data-card-id=\"{cid}\"] #{cid}-badge', {{scale:0, duration:0.2, ease:'power2.in'}}, {fade_out_start});")

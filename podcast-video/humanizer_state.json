@@ -1,0 +1,22 @@
+{
+  "closer": [
+    "Chew on that for a bit.",
+    "Something worth sitting with."
+  ],
+  "opening_energizer": [
+    "Okay, let's dive in.",
+    "Okay, here's the story.",
+    "Alright, let's get into the details.",
+    "Let's get into the weeds on this."
+  ],
+  "cta_outro": [
+    "Enjoyed this one? Drop a like, {ask}, and subscribe so you don't miss the next one. Until next time.",
+    "Like this if it landed, {ask}, and subscribe so tomorrow's drop doesn't slip past you. Catch you next time."
+  ],
+  "unpack_transition": [
+    "Let's pull this apart a bit."
+  ],
+  "audience_address": [
+    "you, running things solo or with a lean team"
+  ]
+}

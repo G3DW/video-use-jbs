@@ -174,8 +174,37 @@ The skill orchestrates this pipeline:
 The daily episodes are NotebookLM-generated two-speaker dialogue audio (the raw export NotebookLM sends each morning, typically 5-15 min, ideally 5-6 min). For these, `build_video.py` is the *second half* of the pipeline — run `regenerate_dialogue.py` first to swap in ElevenLabs voices, then hand its output to `build_video.py`:
 
 ```
+0. (added 2026-08-04) humanize_transcript.py --transcript edit/source_transcript/transcripts/<stem>.json \
+     --output edit/source_transcript/transcripts/<stem>.humanized.json \
+     --report edit/source_transcript/transcripts/<stem>.humanize-report.json \
+     --date <YYYY-MM-DD>
+   - NotebookLM's raw two-speaker dialogue reuses the same handful of
+     connective-tissue phrases nearly verbatim every episode ("let's unpack
+     this", "which brings us to", "so what does this all mean", "something
+     to mull over", "you, the solo creator or small business owner") — this
+     becomes obvious once you binge more than a couple episodes back to
+     back. This script regex-matches those specific phrases against the raw
+     Scribe transcript's word list and swaps each one for a rotating
+     alternative drawn from humanizer_phrases.json, tracked in
+     humanizer_state.json so nothing repeats for at least 4 picks. It never
+     touches analogies, stats, quotes, or anything topic-specific — those
+     already vary naturally and are exactly what gets fact-checked before
+     dubbing, so this pass has no way to introduce a factual error.
+   - Stage 1 of the daily-podcast-pipeline skill runs this right after its
+     own raw transcription (before storyboard drafting), and surfaces the
+     humanize-report.json swaps in review.html so Joe sees exactly what
+     changed in the same pass he already reviews for accuracy. The
+     humanized transcript, not the raw one, is what storyboard-plan.json's
+     anchorQuote fields should reference from that point on.
+
 1. regenerate_dialogue.py --audio raw_episode.m4a \
-     --out-dir edit/dialogue --output edit/final_narration.mp3
+     --out-dir edit/dialogue --output edit/final_narration.mp3 \
+     --transcript edit/source_transcript/transcripts/<stem>.humanized.json \
+     --speaker-map edit/speaker_map.json
+   - `--transcript`/`--speaker-map` are optional (added 2026-08-04) — pass
+     Stage 1's already-produced (humanized) transcript and speaker map here
+     to skip the redundant re-transcription this script used to always do
+     internally. Without them, falls back to the original behavior:
    - Transcribes the raw audio (diarized, word-level, audio events)
    - Pitch-analyzes each diarized speaker to determine male vs. female
      (speaker order varies day to day, so this can't be assumed/hardcoded)
@@ -187,7 +216,20 @@ The daily episodes are NotebookLM-generated two-speaker dialogue audio (the raw 
 
 2. Draft intro.txt (~30s framing) and outro.txt (~20-30s sign-off + CTA to
    like/comment/subscribe) from brief.md + youtube-info.md before invoking
-   build_video.py — see Input Requirements above.
+   build_video.py — see Input Requirements above. These are hand-authored
+   fresh each episode (not sourced from NotebookLM's dialogue, so
+   humanize_transcript.py can't touch them), but in practice they've
+   converged on the same skeleton every time too — "Let's get into it." to
+   close the intro, "drop a like, comment X, and subscribe so you don't
+   miss tomorrow's episode. See you next time." to close the outro. Pull
+   both from the rotation instead of freehanding them:
+   ```
+   pick_scaffold_phrase.py --category opening_energizer
+   pick_scaffold_phrase.py --category cta_outro --ask "comment which X you're trying first"
+   ```
+   Drop the returned line in place of the old boilerplate close. Same
+   humanizer_phrases.json / humanizer_state.json as step 0, so the
+   no-repeat window is shared across the whole episode.
 
 3. build_video.py --audio edit/final_narration.mp3 --video brand-loop.mp4
    - Synthesizes intro.txt/outro.txt in Joe's voice, prepends/appends them
@@ -201,7 +243,9 @@ The daily episodes are NotebookLM-generated two-speaker dialogue audio (the raw 
 4. Author real chapters + description (mandatory, every episode — see
    "Chapter Detection" below): read edit/transcript.md, hand-write real
    chapter titles into edit/chapters.txt and edit/youtube-info.md, and
-   tighten the auto-drafted description there.
+   tighten the auto-drafted description there. Generate the actual YouTube
+   title as its own sub-step — see "YouTube Title" below — rather than
+   reusing the episode brief's headline as-is.
 
 5. Generate the YouTube thumbnail (mandatory, every episode — see
    "Thumbnail" below): invoke the `jbs-adhoc-cover` skill with a
@@ -214,6 +258,13 @@ The daily episodes are NotebookLM-generated two-speaker dialogue audio (the raw 
 6. B-roll pass (title card burn-in + karaoke captions + hand-picked B-roll
    cards, including an outro CTA card synced to the spoken outro) via
    generate_broll.py — see "B-Roll Pass" below.
+
+7. Blog repurposing (mandatory, every episode — see "Blog Repurposing
+   (Beehiiv)" below): draft a companion blog post from transcript.md +
+   brief.md + the underlying Raw/niche-pulse research note, run it through
+   no-ai-slop (including an explicit em-dash count check), pick 2-4
+   content tags, and save it as a Beehiiv draft (or reviewable markdown,
+   until the plan supports learn_post_authoring) — never auto-published.
 ```
 
 For single-narrator episodes (no diarized dialogue to regenerate), skip step 1 and run `build_video.py` directly on the raw audio, same as before.
@@ -268,6 +319,36 @@ Card *content* — which stat, quote, or topic-marker moment gets a card, and it
    Content/2026-MM-DD-podcast/daily-ai-pulse-{date}-final.mp4.
 ```
 
+## Blog Repurposing (Beehiiv)
+
+Added 2026-08-06. Every episode also gets repurposed into a blog post on the Joe Builds Systems Beehiiv publication (`pub_f4c98a61-5759-4f40-bad0-7e8293cfbf58`, joebuildsai.com) — mandatory, daily cadence, not an occasional/curated thing. It is not a transcript dump: the video is the 6-8 minute distillation, the blog post is the expanded companion, written to also perform well in AI-crawler/answer-engine retrieval (GEO), not just traditional SEO.
+
+**Source material** (richer than the video alone, so the post earns its length instead of padding a thin transcript):
+- `edit/transcript.md` + `brief.md` — throughline/thesis
+- The underlying `Raw/niche-pulse-*.md` research note — has the "what the wider internet's saying" section with named creators/platforms/quotes that never made the video
+- The `Raw/Last30Days/*-raw-v3.md` full sweep — long-tail stats/examples/quotes for depth
+
+**Structure:**
+1. Direct-answer opening paragraph — answers "what is this about" extractably in the first 2-3 sentences (this is what both AI Overviews and LLM crawlers lift as the citable summary)
+2. H2 sections mirroring the episode's chapters, each expanded with a named, attributed specific pulled from the raw sweep (creator handle, platform, exact stat) rather than generic paraphrase — GEO rewards original synthesis with attributable specifics over rehashed summary
+3. Closing FAQ block, 3-4 Q&As, each a self-contained extractable answer — doubles for People Also Ask (SEO) and direct-retrieval snippets (GEO)
+4. A subtitle line (SEO/GEO-carrying, distinct from the title — covers keywords the title doesn't) for Beehiiv's subtitle field, written inline in the markdown right under the H1 as `**Subtitle:** ...` so it's visible with the post copy, not just mentioned separately in chat
+5. A `**Tags:** tag one, tag two, tag three` line directly under the subtitle, same reasoning — the tag picks need to travel with the post file, not live only in the conversation, so whoever's pasting into Beehiiv can grab title/subtitle/tags/body from one file without cross-referencing anything else
+6. Companion-episode line linking back to the YouTube video — **the real link can't be filled in until after upload**, since this step runs before that in the pipeline (not an issue for backfills, where the video's already live and the real URL should be looked up, e.g. via the `youtube-search` skill, rather than left as a placeholder); leave an explicit `[PASTE YOUTUBE LINK HERE ONCE UPLOADED]` placeholder only when the episode genuinely hasn't published yet
+7. Closing CTA links to `joebuildsai.com` (the main site), not `weekly.joebuildsai.com` — linking a newsletter-hosted post back to its own newsletter signup is circular
+
+**Title:** reuse the same hook-generation process as the YouTube title (see "YouTube Title" above) — same winning title on both, since it's already been optimized for CTR + SEO and duplicating it here reinforces the same search term instead of splitting it.
+
+**Mandatory no-ai-slop pass, with an explicit em-dash count check:** run the drafted post through `no-ai-slop` same as the title. Pattern-scanning alone isn't enough — explicitly count em dashes (`grep -o '—' <file> | wc -l`) and get it to 0-1 for a post this length. The 2026-08-06 sample draft had 30 on first pass (missed on a pattern-only scan) and needed a dedicated count-and-fix pass, converting each to whatever it was actually doing: colons for label/list intros, parentheses for true asides, periods where it was just glue holding two sentences together.
+
+**Content tags:** call `list_content_tags` on the publication and pick 2-4 tags whose description genuinely matches the post's actual topic — not just keyword overlap. Prefer tags that name the specific mechanism/theme covered (e.g. "Prompt Engineering" for a post centered on prompt contracts) over broad umbrella tags applied to everything. Don't stretch a technique-used-to-write-the-post (e.g. GEO) into a topic tag unless the post is actually about that technique. If the existing tag set doesn't cover recurring topic clusters well, that's a signal to expand the taxonomy (a separate task, not something to solve ad hoc per-post — see the content-tags-reference task pattern).
+
+**Images:** default to reusing the NotebookLM-slideshow images already staged for B-roll (`hf-broll-assets/images/notebooklm-slides/`, see "NotebookLM Slide Assets" below) if any are thematically relevant to the episode — zero extra generation cost. A dedicated header/secondary image pair (matching the newsletter's normal two-image pattern) is a `jbs-adhoc-cover`-style addition, not yet built into this step.
+
+**Publishing:** draft only, via Beehiiv's `save_post` (never auto-publishes — promotion stays a manual action in the Beehiiv UI). `learn_post_authoring` (the tool that returns Beehiiv's exact HTML contract) is plan-gated on the current subscription; until upgraded, write the draft as reviewable markdown for manual copy-paste into the Beehiiv editor rather than risk pushing malformed HTML via `save_post`.
+
+**Backfilling past episodes:** for the standing daily process, drafts live at `Content/<date>-podcast/edit/blog_post_draft.md`, next to that episode's other pipeline output. When backfilling a batch of already-published episodes instead, save all of them flat into one consolidated folder (`Content/podcast-blog-backfill/<date>-blog-post.md`) rather than spreading them across per-episode folders — easier to grab each one for manual copy-paste without navigating in and out of dated directories. Episode source folders for a backfill batch may live in a Drive archive rather than locally; if the local `CloudStorage` mount fails to read/copy a file directly (`Resource deadlock avoided` or similar), fall back to the Google Drive API (`search_files` for the file ID, `download_file_content` to fetch it, decode the returned base64 locally) rather than retrying the same local read repeatedly.
+
 ## Customization
 
 ### Brand Video Guidelines
@@ -286,6 +367,17 @@ Adjust in config or via flags:
 - `waveform_position`: Y-position from top (490 = lower third for 720p)
 - `waveform_opacity`: 0.0-1.0 (default 0.9)
 - `waveform_glow`: Enable/disable glow effect
+
+### YouTube Title
+
+The `**Episode:**` title (added 2026-08-06) is not the episode brief's headline pasted in as-is, and it is not the thumbnail's on-image headline reused verbatim — thumbnail text and video title do different jobs (thumbnail wins the visual scan, title wins the search/click decision) and repeating one as the other wastes an impression. Generate it as its own sub-step, mandatory every episode:
+
+1. Draft 4-6 hook-style title candidates by invoking the `tiktok-script-structurer` skill for its hook-type taxonomy only (Statistic, Problem, Contrarian, Curiosity Gap, Insider, Future Pacing, etc.) — not the full TikTok script structure (no on-screen text cue, visual hook, second beat). Pull the concrete stat/quote/mechanism for each hook straight from the episode's transcript/chapters, the same way B-roll card content gets picked. Explicitly exclude any candidate that duplicates the thumbnail headline's wording — they need to say different things.
+2. Run the candidates through `no-ai-slop` to cut AI-cadence patterns (binary contrasts, dramatic fragmentation, colon reveals) and tighten to 50-70 characters — YouTube titles run as plain text in search results with no thumbnail alongside, so they have to stand alone.
+3. **Pick the best one autonomously** — don't ask the user to choose. Weigh it on two axes: click-through likelihood (a concrete stat or named entity beats an abstract claim; loss-aversion/curiosity-gap framing beats a flat description) and SEO (does it contain the actual search terms someone would type — "Claude," the specific tool/technique name, the concrete numbers — rather than only clever phrasing). A title that's punchy but keyword-empty loses to one that's slightly plainer and matches real search queries. State the pick and a one-line reason in the summary; keep the runner-up options in `youtube-info.md`'s "Alternative Titles for the algo" block for future A/B testing, same as today.
+4. Write the winner into both the `**Episode:**` field and the description body's title line in `edit/youtube-info.md`.
+
+This process was established 2026-08-06 after generating title options manually for that episode and confirming with Joe which one to lead with; going forward the pick is automatic, not a per-episode question.
 
 ### Chapter Detection
 

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1920">
+    <title>Animated Captions (safe-zone)</title>
+    <style>/*
+ * Cross-platform safe zone (TikTok ∩ Reels/Facebook) for 9:16 shorts.
+ * Values are injected at render time from ../safe_zones.json — do not
+ * hardcode different numbers here; keep safe_zones.json as the single
+ * source of truth and let the {{SAFE_*}} placeholders below get replaced.
+ */
+:root {
+  --safe-top: 220px;
+  --safe-bottom: 420px;
+  --safe-left: 60px;
+  --safe-right: 120px;
+}
+
+/* Absolute-positioned box that excludes the unsafe margin on all four
+ * edges. Place overlay content (captions, lower-thirds, badges) inside
+ * this, not directly on the stage/body. */
+.safe-zone {
+  position: absolute;
+  left: var(--safe-left);
+  top: var(--safe-top);
+  right: var(--safe-right);
+  bottom: var(--safe-bottom);
+  box-sizing: border-box;
+}
+</style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 1080px;
+            height: 1920px;
+            background: transparent;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+
+        /* Captions pin to the bottom edge of the safe zone (as low as
+           the platform-chrome margins allow) rather than dead-center,
+           which is where the old template placed them. */
+        .safe-zone {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .caption-container {
+            width: 100%;
+            text-align: center;
+            padding-bottom: 24px;
+        }
+
+        .word {
+            display: inline-block;
+            font-size: 72px;
+            font-weight: 800;
+            color: #FFFFFF;
+            text-shadow:
+                2px 2px 4px rgba(0, 0, 0, 0.9),
+                0 0 20px rgba(0, 0, 0, 0.5);
+            margin: 0 8px 16px 8px;
+            opacity: 0;
+            transform: scale(0.8);
+            transform-origin: center;
+            line-height: 1.2;
+            position: relative;
+            transition: opacity 0.1s ease-out;
+        }
+
+        .word.active {
+            opacity: 1 !important;
+            transform: scale(1);
+        }
+
+        .word.active .highlight {
+            opacity: 1;
+            transform: scaleX(1);
+        }
+
+        .word.past {
+            opacity: 0.5;
+        }
+
+        .highlight {
+            position: absolute;
+            bottom: 8px;
+            left: -4px;
+            right: -4px;
+            height: 24px;
+            background: #FFEB3B;
+            z-index: -1;
+            opacity: 0;
+            transform: scaleX(0);
+            transform-origin: left;
+            border-radius: 4px;
+        }
+
+        /* Punctuation stays with word */
+        .punctuation {
+            margin-left: -4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="safe-zone">
+        <div class="caption-container" id="captionContainer"></div>
+    </div>
+
+    <script>
+        // Word timing data will be injected here
+        const WORDS = [{"text": "So", "start": 0.2440000000000282, "end": 0.3439999999999941}, {"text": "if", "start": 0.38400000000001455, "end": 0.48399999999998045}, {"text": "you're", "start": 0.5240000000000009, "end": 0.6739999999999782}, {"text": "shipping", "start": 0.7040000000000077, "end": 1.1739999999999782}, {"text": "AI", "start": 1.2440000000000282, "end": 1.5840000000000032}, {"text": "scaffolded", "start": 1.6639999999999873, "end": 2.2339999999999804}, {"text": "MCP", "start": 2.444000000000017, "end": 3.004000000000019}, {"text": "connectors", "start": 3.0439999999999827, "end": 3.8039999999999736}, {"text": "or", "start": 3.843999999999994, "end": 4.064000000000021}, {"text": "automations,", "start": 4.103999999999985, "end": 4.8840000000000146}, {"text": "don't", "start": 5.463999999999999, "end": 5.7339999999999804}, {"text": "trust", "start": 5.76400000000001, "end": 6.043999999999983}, {"text": "the", "start": 6.163999999999987, "end": 6.204000000000008}, {"text": "green", "start": 6.244000000000028, "end": 6.504000000000019}, {"text": "check", "start": 6.564000000000021, "end": 6.803999999999974}, {"text": "mark.", "start": 6.8840000000000146, "end": 7.1440000000000055}, {"text": "Budget", "start": 7.684000000000026, "end": 8.024000000000001}, {"text": "real", "start": 8.184000000000026, "end": 8.524000000000001}, {"text": "human", "start": 8.624000000000024, "end": 9.084000000000003}, {"text": "QA", "start": 9.26400000000001, "end": 9.463999999999999}, {"text": "time,", "start": 9.564000000000021, "end": 9.884000000000015}, {"text": "test", "start": 10.283999999999992, "end": 10.644000000000005}, {"text": "with", "start": 10.684000000000026, "end": 10.843999999999994}, {"text": "real", "start": 10.903999999999996, "end": 11.184000000000026}, {"text": "data", "start": 11.22399999999999, "end": 11.423999999999978}, {"text": "volumes,", "start": 11.504000000000019, "end": 11.994000000000028}, {"text": "and", "start": 12.444000000000017, "end": 12.574000000000012}, {"text": "put", "start": 12.603999999999985, "end": 12.783999999999992}, {"text": "hard-coded", "start": 12.824000000000012, "end": 13.524000000000001}, {"text": "approval", "start": 13.584000000000003, "end": 13.963999999999999}, {"text": "gates", "start": 14.043999999999983, "end": 14.423999999999978}, {"text": "on", "start": 14.48399999999998, "end": 14.704000000000008}, {"text": "anything", "start": 14.783999999999992, "end": 15.194000000000017}, {"text": "risky.", "start": 15.283999999999992, "end": 15.704000000000008}, {"text": "If", "start": 16.363999999999976, "end": 16.464}, {"text": "this", "start": 16.50400000000002, "end": 16.673999999999978}, {"text": "made", "start": 16.72399999999999, "end": 16.884000000000015}, {"text": "you", "start": 16.903999999999996, "end": 17.00400000000002}, {"text": "want", "start": 17.053999999999974, "end": 17.163999999999987}, {"text": "to", "start": 17.173999999999978, "end": 17.244000000000028}, {"text": "go", "start": 17.303999999999974, "end": 17.464}, {"text": "audit", "start": 17.48399999999998, "end": 17.783999999999992}, {"text": "your", "start": 17.843999999999994, "end": 17.964}, {"text": "own", "start": 18.00400000000002, "end": 18.22399999999999}, {"text": "agent's", "start": 18.303999999999974, "end": 18.644000000000005}, {"text": "tool", "start": 18.684000000000026, "end": 18.884000000000015}, {"text": "calls,", "start": 18.98399999999998, "end": 19.324000000000012}, {"text": "drop", "start": 19.863999999999976, "end": 20.084000000000003}, {"text": "a", "start": 20.103999999999985, "end": 20.163999999999987}, {"text": "like,", "start": 20.204000000000008, "end": 20.524}, {"text": "comment", "start": 20.843999999999994, "end": 21.163999999999987}, {"text": "which", "start": 21.22399999999999, "end": 21.363999999999976}, {"text": "connector", "start": 21.444000000000017, "end": 21.803999999999974}, {"text": "you're", "start": 21.843999999999994, "end": 21.964}, {"text": "checking", "start": 22.00400000000002, "end": 22.363999999999976}, {"text": "first,", "start": 22.423999999999978, "end": 22.783999999999992}, {"text": "and", "start": 23.22399999999999, "end": 23.303999999999974}, {"text": "subscribe", "start": 23.384000000000015, "end": 23.964}, {"text": "so", "start": 24.043999999999983, "end": 24.103999999999985}, {"text": "you", "start": 24.163999999999987, "end": 24.204000000000008}, {"text": "don't", "start": 24.244000000000028, "end": 24.384000000000015}, {"text": "miss", "start": 24.423999999999978, "end": 24.584000000000003}, {"text": "tomorrow's", "start": 24.624000000000024, "end": 25.00400000000002}, {"text": "episode.", "start": 25.084000000000003, "end": 25.56400000000002}, {"text": "See", "start": 26.343999999999994, "end": 26.444000000000017}, {"text": "you", "start": 26.50400000000002, "end": 26.543999999999983}, {"text": "next", "start": 26.603999999999985, "end": 26.803999999999974}, {"text": "time.", "start": 26.843999999999994, "end": 27.103999999999985}];
+        const DURATION = 27.103999999999985;
+        const FPS = 30;
+
+        const container = document.getElementById('captionContainer');
+        let animationFrameId = null;
+        let startTime = null;
+
+        // Create DOM elements for all words
+        function initializeWords() {
+            container.innerHTML = '';
+
+            WORDS.forEach((wordData, index) => {
+                const wordSpan = document.createElement('span');
+                wordSpan.className = 'word';
+                wordSpan.setAttribute('data-index', index);
+                wordSpan.innerHTML = `
+                    <span class="highlight"></span>
+                    ${wordData.text}
+                `;
+                container.appendChild(wordSpan);
+            });
+        }
+
+        // Animate words based on timestamp
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const elapsed = (timestamp - startTime) / 1000; // Convert to seconds
+
+            // Update word states
+            WORDS.forEach((wordData, index) => {
+                const wordElement = container.querySelector(`[data-index="${index}"]`);
+                if (!wordElement) return;
+
+                const wordStart = wordData.start;
+                const wordEnd = wordData.end;
+
+                if (elapsed >= wordStart && elapsed < wordEnd) {
+                    // Current word - highlight
+                    wordElement.classList.add('active');
+                    wordElement.classList.remove('past');
+                } else if (elapsed >= wordEnd) {
+                    // Past word - dim
+                    wordElement.classList.remove('active');
+                    wordElement.classList.add('past');
+                } else {
+                    // Future word - hidden
+                    wordElement.classList.remove('active', 'past');
+                }
+            });
+
+            // Continue animation
+            if (elapsed < DURATION) {
+                animationFrameId = requestAnimationFrame(animate);
+            } else {
+                // Animation complete - all words visible and dimmed
+                container.querySelectorAll('.word').forEach(el => {
+                    el.classList.add('past');
+                    el.classList.remove('active');
+                });
+            }
+        }
+
+        // Initialize and start
+        initializeWords();
+
+        // Start animation immediately for HyperFrames capture
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>

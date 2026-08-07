@@ -1,0 +1,24 @@
+/*
+ * Cross-platform safe zone (TikTok ∩ Reels/Facebook) for 9:16 shorts.
+ * Values are injected at render time from ../safe_zones.json — do not
+ * hardcode different numbers here; keep safe_zones.json as the single
+ * source of truth and let the {{SAFE_*}} placeholders below get replaced.
+ */
+:root {
+  --safe-top: {{SAFE_TOP}}px;
+  --safe-bottom: {{SAFE_BOTTOM}}px;
+  --safe-left: {{SAFE_LEFT}}px;
+  --safe-right: {{SAFE_RIGHT}}px;
+}
+
+/* Absolute-positioned box that excludes the unsafe margin on all four
+ * edges. Place overlay content (captions, lower-thirds, badges) inside
+ * this, not directly on the stage/body. */
+.safe-zone {
+  position: absolute;
+  left: var(--safe-left);
+  top: var(--safe-top);
+  right: var(--safe-right);
+  bottom: var(--safe-bottom);
+  box-sizing: border-box;
+}

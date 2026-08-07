@@ -28,15 +28,6 @@
     "loudness_tp": "-1.5",
     "loudness_lra": "11"
   },
-  "outro": {
-    "enabled": true,
-    "voice_id": "8579yP6p1e1Pydb8F0dg",
-    "model_id": "eleven_v3",
-    "gap_seconds": 0.5,
-    "loudness_i": "-16",
-    "loudness_tp": "-1.5",
-    "loudness_lra": "11"
-  },
   "output": {
     "filename_template": "daily-ai-pulse-{date}-final.mp4"
   },

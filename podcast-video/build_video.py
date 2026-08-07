@@ -13,6 +13,14 @@ import argparse
 from pathlib import Path
 from datetime import datetime
 
+NEWSLETTER_URL = "https://weekly.joebuildsai.com"
+
+# Fixed channel branding — same on every episode, never derived from
+# episode content. Episode-specific tags/hashtags are additive on top of
+# these, not a replacement for them.
+CHANNEL_TAGS = ["joeBuilds Systems", "AI News", "Daily AI Pulse", "AI Agents"]
+CHANNEL_HASHTAGS = ["#AI", "#AIAgents", "#AINews"]
+
 class PodcastVideoBuilder:
     def __init__(self, config_path=None):
         self.script_dir = Path(__file__).parent
@@ -157,62 +165,47 @@ class PodcastVideoBuilder:
         """Resolve the intro mp3: explicit flag, generate from text, or auto-discover."""
         if no_intro or not self.config["intro"].get("enabled", True):
             return None
-
-        if intro_audio_path:
-            return Path(intro_audio_path)
-
-        temp_dir = self.edit_dir / "temp"
-        temp_dir.mkdir(parents=True, exist_ok=True)
-
-        if intro_text_path:
-            return self._generate_bookend_from_text(Path(intro_text_path), temp_dir, "intro", self.config["intro"])
-
-        auto_audio = self.working_dir / "intro.mp3"
-        if auto_audio.exists():
-            print(f"  Found intro audio: {auto_audio.name}")
-            return auto_audio
-
-        auto_text = self.working_dir / "intro.txt"
-        if auto_text.exists():
-            return self._generate_bookend_from_text(auto_text, temp_dir, "intro", self.config["intro"])
-
-        return None
+        return self._resolve_bookend_audio(
+            self.config["intro"], "intro", intro_audio_path, intro_text_path
+        )
 
     def resolve_outro_audio(self, outro_audio_path=None, outro_text_path=None, no_outro=False):
-        """Resolve the outro mp3: explicit flag, generate from text, or auto-discover.
-        Mirrors resolve_intro_audio, but appended to the end of the episode
-        instead of prepended — a spoken sign-off / CTA (like, comment,
-        subscribe) so the video doesn't just cut off after the last line."""
+        """Resolve the outro mp3: explicit flag, generate from text, or auto-discover."""
         if no_outro or not self.config["outro"].get("enabled", True):
             return None
+        return self._resolve_bookend_audio(
+            self.config["outro"], "outro", outro_audio_path, outro_text_path
+        )
 
-        if outro_audio_path:
-            return Path(outro_audio_path)
+    def _resolve_bookend_audio(self, cfg, name, audio_path=None, text_path=None):
+        """Shared resolution logic for the intro/outro: explicit flag, generate
+        from text, or auto-discover `<name>.mp3`/`<name>.txt` in the working dir."""
+        if audio_path:
+            return Path(audio_path)
 
         temp_dir = self.edit_dir / "temp"
         temp_dir.mkdir(parents=True, exist_ok=True)
 
-        if outro_text_path:
-            return self._generate_bookend_from_text(Path(outro_text_path), temp_dir, "outro", self.config["outro"])
+        if text_path:
+            return self._generate_bookend_from_text(Path(text_path), temp_dir, cfg, name)
 
-        auto_audio = self.working_dir / "outro.mp3"
+        auto_audio = self.working_dir / f"{name}.mp3"
         if auto_audio.exists():
-            print(f"  Found outro audio: {auto_audio.name}")
+            print(f"  Found {name} audio: {auto_audio.name}")
             return auto_audio
 
-        auto_text = self.working_dir / "outro.txt"
+        auto_text = self.working_dir / f"{name}.txt"
         if auto_text.exists():
-            return self._generate_bookend_from_text(auto_text, temp_dir, "outro", self.config["outro"])
+            return self._generate_bookend_from_text(auto_text, temp_dir, cfg, name)
 
         return None
 
-    def _generate_bookend_from_text(self, text_path, temp_dir, label, cfg):
-        """Shell out to generate_intro.py to synthesize + master an intro or outro clip.
-        generate_intro.py is just text->voice synthesis + mastering, so it's reused
-        as-is for outro audio too."""
-        output = temp_dir / f"{label}.mp3"
+    def _generate_bookend_from_text(self, text_path, temp_dir, cfg, name):
+        """Shell out to generate_intro.py (a generic ElevenLabs TTS + mastering
+        script, despite the name) to synthesize + master an intro or outro."""
+        output = temp_dir / f"{name}.mp3"
 
-        print(f"  Generating {label} from {text_path.name}...")
+        print(f"  Generating {name} from {text_path.name}...")
         result = subprocess.run(
             [sys.executable, str(self.script_dir / "generate_intro.py"),
              "--text-file", str(text_path),
@@ -226,17 +219,23 @@ class PodcastVideoBuilder:
         )
 
         if result.returncode != 0:
-            print(f"✗ {label.title()} generation failed: {result.stderr}")
+            print(f"✗ {name.capitalize()} generation failed: {result.stderr}")
             return None
 
-        print(f"✓ Generated {label}: {output}")
+        print(f"✓ Generated {name}: {output}")
         return output
 
+    def _probe_duration(self, audio_path):
+        probe = subprocess.run(
+            ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", str(audio_path)],
+            capture_output=True, text=True,
+        )
+        return float(json.loads(probe.stdout)["format"]["duration"])
+
     def assemble_audio(self, episode_audio, intro_audio=None, outro_audio=None):
-        """Concatenate intro? + gap + episode + gap + outro? into one file,
-        and persist the intro/content/outro boundaries so downstream steps
-        (e.g. the B-roll title-card/caption pass) don't have to re-derive
-        them by inspecting the transcript for a gap."""
+        """Concatenate intro + gap + episode + gap + outro (whichever parts are
+        present) into one combined_audio.mp3, and record the intro/content and
+        content/outro boundaries for downstream steps (e.g. the B-roll pass)."""
         if not intro_audio and not outro_audio:
             return episode_audio
 
@@ -244,44 +243,32 @@ class PodcastVideoBuilder:
         outro_gap = self.config["outro"]["gap_seconds"]
         combined = self.edit_dir / "temp" / "combined_audio.mp3"
 
-        parts_desc = []
-        inputs = []
-        concat_inputs = []
-        idx = 0
-
-        def add_file(path):
-            nonlocal idx
-            inputs += ["-i", str(path)]
-            concat_inputs.append(f"[{idx}:a]")
-            idx += 1
-
-        def add_gap(seconds):
-            nonlocal idx
-            inputs += ["-f", "lavfi", "-t", str(seconds), "-i", "anullsrc=r=44100:cl=mono"]
-            concat_inputs.append(f"[{idx}:a]")
-            idx += 1
-
+        parts = []
         if intro_audio:
-            add_file(intro_audio)
-            add_gap(intro_gap)
-            parts_desc.append(f"intro ({intro_audio.name})")
-        add_file(episode_audio)
+            parts.append(("audio", str(intro_audio)))
+            parts.append(("gap", intro_gap))
+        parts.append(("audio", str(episode_audio)))
         if outro_audio:
-            add_gap(outro_gap)
-            add_file(outro_audio)
-            parts_desc.append(f"outro ({outro_audio.name})")
+            parts.append(("gap", outro_gap))
+            parts.append(("audio", str(outro_audio)))
 
-        print(f"  Assembling combined audio: {' + '.join(parts_desc)} + episode...")
+        label = "prepending intro" if intro_audio else ""
+        label += (" and " if label and outro_audio else "") + ("appending outro" if outro_audio else "")
+        print(f"  {label.capitalize()} to episode audio...")
 
-        filter_complex = "".join(concat_inputs) + f"concat=n={len(concat_inputs)}:v=0:a=1[out]"
-        cmd = [
-            "ffmpeg", "-y", *inputs,
-            "-filter_complex", filter_complex,
-            "-map", "[out]", "-c:a", "mp3", "-q:a", "2",
-            str(combined),
-        ]
+        cmd = ["ffmpeg", "-y"]
+        filter_inputs = []
+        for i, (kind, value) in enumerate(parts):
+            if kind == "audio":
+                cmd += ["-i", value]
+            else:
+                cmd += ["-f", "lavfi", "-t", str(value), "-i", "anullsrc=r=44100:cl=mono"]
+            filter_inputs.append(f"[{i}:a]")
+
+        filter_complex = "".join(filter_inputs) + f"concat=n={len(parts)}:v=0:a=1[out]"
+        cmd += ["-filter_complex", filter_complex, "-map", "[out]", "-c:a", "mp3", "-q:a", "2", str(combined)]
+
         result = subprocess.run(cmd, capture_output=True, text=True)
-
         if result.returncode != 0:
             print(f"✗ Failed to assemble audio: {result.stderr}")
             return None
@@ -294,28 +281,23 @@ class PodcastVideoBuilder:
             stale_cache.unlink()
             print(f"  Invalidated stale transcript cache: {stale_cache.name}")
 
-        def duration_of(path):
-            probe = subprocess.run(
-                ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", str(path)],
-                capture_output=True, text=True,
-            )
-            return float(json.loads(probe.stdout)["format"]["duration"])
-
+        # Persist the intro/content/outro boundaries so downstream steps (e.g.
+        # the B-roll title-card/caption pass) don't have to re-derive them by
+        # inspecting the transcript for gaps.
         meta = {}
-        content_start = 0.0
         if intro_audio:
-            intro_duration = round(duration_of(intro_audio), 2)
-            content_start = round(intro_duration + intro_gap, 2)
+            intro_duration = round(self._probe_duration(intro_audio), 2)
             meta["intro_duration"] = intro_duration
-            meta["intro_gap_seconds"] = intro_gap
-        meta["content_start"] = content_start
-
+            meta["gap_seconds"] = intro_gap
+            meta["content_start"] = round(intro_duration + intro_gap, 2)
         if outro_audio:
-            episode_duration = duration_of(episode_audio)
-            content_end = round(content_start + episode_duration, 2)
-            meta["content_end"] = content_end
+            episode_duration = self._probe_duration(episode_audio)
+            outro_duration = round(self._probe_duration(outro_audio), 2)
+            content_start = meta.get("content_start", 0.0)
+            outro_start = round(content_start + episode_duration + outro_gap, 2)
+            meta["outro_duration"] = outro_duration
             meta["outro_gap_seconds"] = outro_gap
-            meta["outro_start"] = round(content_end + outro_gap, 2)
+            meta["outro_start"] = outro_start
 
         meta_path = self.edit_dir / "intro_meta.json"
         meta_path.write_text(json.dumps(meta, indent=2))
@@ -570,67 +552,87 @@ class PodcastVideoBuilder:
         millis = int((seconds % 1) * 1000)
         return f"{hours:02d}:{minutes:02d}:{secs:02d},{millis:03d}"
 
-    def _extract_brief_title(self):
-        """Pull the H1 title out of brief.md, if present."""
-        brief_path = self.working_dir / "brief.md"
-        if not brief_path.exists():
-            return None
-        for line in brief_path.read_text().splitlines():
-            if line.strip().startswith("# "):
-                return line.strip()[2:].strip()
-        return None
+    def derive_episode_title(self, original_audio_file, notes_file=None):
+        """Derive a human episode title. Prefers the first line of the notes
+        file (e.g. brief.md's headline); falls back to the original episode
+        audio's filename (never the intermediate `combined_audio` stem, which
+        is an internal artifact name, not a title)."""
+        if notes_file and Path(notes_file).exists():
+            for line in Path(notes_file).read_text().splitlines():
+                line = line.strip().lstrip("#").strip()
+                if line:
+                    return line
+        return original_audio_file.stem.replace("-", " ").replace("_", " ").title()
 
-    def _draft_description(self):
-        """Draft a YouTube description from brief.md (title + why-now + deep-dive
-        summary) plus a standard CTA. Best-effort: brief.md's structure isn't
-        rigidly enforced, so this degrades to a placeholder if it can't be parsed."""
-        brief_path = self.working_dir / "brief.md"
-        if not brief_path.exists():
-            return ("(No brief.md found — write a 2-3 sentence summary of the episode here.)\n\n"
-                    "---\n\nSubscribe for daily AI news and breakdowns.")
+    def generate_tags(self, notes_file=None):
+        """Seed a starting comma-separated tag list for YouTube SEO. Like
+        chapters, real tags need editorial judgment about what the episode
+        actually covers — this only seeds show branding plus a few keywords
+        pulled from the notes file's headline, and must be hand-tightened per
+        episode (add the actual tools/topics/names discussed) before upload."""
+        tags = list(CHANNEL_TAGS)
 
-        text = brief_path.read_text()
-        lines = text.splitlines()
-        title = self._extract_brief_title() or ""
+        if notes_file and Path(notes_file).exists():
+            headline = ""
+            for line in Path(notes_file).read_text().splitlines():
+                line = line.strip().lstrip("#").strip()
+                if line:
+                    headline = line
+                    break
 
-        def section(heading):
-            pattern = rf"^##\s*{re.escape(heading)}\s*$"
-            capturing = False
-            body = []
-            for line in lines:
-                if re.match(pattern, line.strip(), re.IGNORECASE):
-                    capturing = True
+            stopwords = {
+                "the", "a", "an", "and", "or", "but", "for", "of", "on", "in",
+                "to", "your", "you", "why", "how", "what", "is", "are", "it",
+                "with", "that", "this", "don't", "doesn't", "under", "so",
+                "hold", "up", "real", "not", "bad", "habits",
+            }
+            seen = {t.lower() for t in tags}
+            for word in re.findall(r"[A-Za-z][A-Za-z'\-]{2,}", headline):
+                key = word.lower()
+                if key in stopwords or key in seen:
                     continue
-                if capturing:
-                    if line.strip().startswith("## "):
-                        break
-                    body.append(line)
-            return "\n".join(body).strip()
+                seen.add(key)
+                tags.append(word)
+                if len(tags) >= 15:
+                    break
 
-        why_now_match = re.search(r"\*\*Why now:\*\*\s*(.+)", text)
-        why_now = why_now_match.group(1).strip() if why_now_match else ""
-        deep_dive = section("Deep-dive summary")
+        return tags
 
-        parts = []
-        if title:
-            parts.append(title)
-        if why_now:
-            parts.append(why_now)
-        if deep_dive:
-            parts.append(deep_dive)
-        if not parts:
-            parts.append("(brief.md found but couldn't be parsed — write a summary here.)")
+    def generate_hashtags(self, tags):
+        """Fixed channel hashtags (CHANNEL_HASHTAGS) plus 2-3 episode-specific
+        ones derived from the tag list, for the description's top/bottom
+        hashtag lines. The channel hashtags never change; the rest are an
+        auto-seeded starting point and need the same hand-tightening pass as
+        generate_tags to actually match the episode."""
+        hashtags = list(CHANNEL_HASHTAGS)
+        seen = {h.lower() for h in hashtags}
+        channel_tag_keys = {t.lower() for t in CHANNEL_TAGS}
 
-        parts.append(
-            "---\n\n"
-            "If this saved you from a bad model bet, like the video and subscribe — "
-            "we break down one AI story like this every day.\n\n"
-            "Got a model or workflow you want validated? Drop it in the comments."
-        )
-        return "\n\n".join(parts)
+        for tag in tags:
+            if tag.lower() in channel_tag_keys:
+                continue
+            tag_clean = re.sub(r"[^A-Za-z0-9]", "", tag)
+            if not tag_clean:
+                continue
+            hashtag = f"#{tag_clean}"
+            if hashtag.lower() in seen:
+                continue
+            hashtags.append(hashtag)
+            seen.add(hashtag.lower())
+            if len(hashtags) >= len(CHANNEL_HASHTAGS) + 3:
+                break
 
-    def generate_upload_info(self, audio_file, chapters, final_video):
-        """Generate YouTube upload information document"""
+        return hashtags
+
+    def generate_upload_info(self, original_audio_file, chapters, final_video, notes_file=None):
+        """Generate YouTube upload information document.
+
+        Note: this reflects the video build_video.py itself rendered (waveform
+        + intro/outro, no B-roll). If a B-roll pass (generate_broll.py) runs
+        afterward and its output is promoted over the top-level final video,
+        run `generate_broll.py finalize` to refresh Duration/File Size here
+        against the actual promoted file — don't leave this stale.
+        """
         output = self.edit_dir / "youtube-info.md"
 
         # Get video info
@@ -644,43 +646,71 @@ class PodcastVideoBuilder:
         duration = float(info["format"]["duration"])
         size_mb = int(info["format"]["size"]) / (1024 * 1024)
 
-        # The chapter detector below is a coarse stub (real topic-shift titles
-        # need semantic judgment it doesn't have) — flag it loudly so this
-        # never gets uploaded as-is. See podcast-video SKILL.md's mandatory
-        # "author real chapters + description" step.
-        chapters_are_stub = all(title in ("Intro",) or title.startswith("Chapter ") for _, title in chapters)
+        episode_title = self.derive_episode_title(original_audio_file, notes_file)
+
+        tags = self.generate_tags(notes_file)
+        hashtags = self.generate_hashtags(tags)
+        hashtag_line = " ".join(hashtags)
+
+        chapter_lines = []
+        for ts, title in chapters:
+            if ts == 0:
+                chapter_lines.append(f"00:00 - {title}")
+            else:
+                mins = int(ts // 60)
+                secs = int(ts % 60)
+                chapter_lines.append(f"{mins:02d}:{secs:02d} - {title}")
 
         with open(output, 'w') as f:
             f.write(f"# YouTube Upload Information\n\n")
-            f.write(f"**Episode:** {audio_file.stem.replace('-', ' ').title()}\n")
+            f.write(f"**Episode:** {episode_title}\n")
             f.write(f"**Date:** {datetime.now().strftime('%Y-%m-%d')}\n")
             f.write(f"**Duration:** {int(duration // 60)}:{int(duration % 60):02d}\n")
             f.write(f"**File Size:** {size_mb:.0f} MB\n\n")
-            f.write("---\n\n## Description\n\n")
-            f.write(self._draft_description())
-            f.write("\n\n---\n\n## Chapter Timestamps\n\n")
-            if chapters_are_stub:
-                f.write("**⚠ AUTO-PLACEHOLDER — replace with real chapters read from transcript.md "
-                        "before publishing.**\n\n")
-            f.write("```\n")
+            f.write("---\n\n## Description (paste directly into YouTube)\n\n```\n")
 
-            for ts, title in chapters:
-                if ts == 0:
-                    f.write(f"00:00 - {title}\n")
-                else:
-                    mins = int(ts // 60)
-                    secs = int(ts % 60)
-                    f.write(f"{mins:02d}:{secs:02d} - {title}\n")
-
+            f.write(f"{hashtag_line}\n\n")
+            f.write(f"Get free AI playbooks & automations 👉 {NEWSLETTER_URL}\n\n")
+            f.write("[If this episode features a guest, add here: 💬 Featuring: Name, role (context)]\n\n")
+            f.write(f"{episode_title}\n\n")
+            f.write("[PLACEHOLDER: 2-4 sentence hook/summary — hand-write from transcript.md]\n\n")
+            f.write("→ [PLACEHOLDER key point 1]\n")
+            f.write("→ [PLACEHOLDER key point 2]\n")
+            f.write("→ [PLACEHOLDER key point 3]\n\n")
+            f.write("Hit like, subscribe, and turn on notifications for daily AI breakdowns.\n\n")
+            f.write("⏱️ Chapters\n")
+            for line in chapter_lines:
+                f.write(f"{line}\n")
+            f.write("\n")
+            f.write("Alternative Titles for the algo:\n")
+            f.write("• [PLACEHOLDER alt title 1]\n")
+            f.write("• [PLACEHOLDER alt title 2]\n")
+            f.write("• [PLACEHOLDER alt title 3]\n\n")
+            f.write(f"{hashtag_line}\n\n")
+            f.write("--\n\n")
+            f.write("I'm Joe. I build AI agent systems in public at joeBuilds Systems: daily "
+                     "breakdowns of what's actually working (and breaking) in AI agents, coding "
+                     "tools, and automation, for solo builders and small teams who don't have time "
+                     "to track it all themselves.\n\n")
+            f.write(f"Get more free AI breakdowns & automations 👉 {NEWSLETTER_URL}\n")
             f.write("```\n\n")
+            f.write("_Auto-scaffolded — same mandatory hand-tightening pass as chapters/tags: "
+                     "write the real summary/bullets/alt-titles from transcript.md, drop the "
+                     "Featuring line unless this is a guest interview, and swap the hashtags for "
+                     "ones that match this episode's actual topic._\n\n")
+
+            f.write("## Tags\n\n")
+            f.write(f"{', '.join(tags)}\n\n")
+            f.write("_Auto-seeded show branding + headline keywords — tighten with the actual "
+                     "tools/topics/names covered this episode before pasting into YouTube's tags field "
+                     "(same mandatory pass as chapters/description)._\n\n")
+
             f.write("## Files\n\n")
             f.write(f"- Video: `{final_video.name}`\n")
             f.write(f"- Subtitles: `subtitles.srt`\n")
             f.write(f"- Transcript: `transcript.md`\n")
 
         print(f"✓ Generated upload info: {output}")
-        if chapters_are_stub:
-            print("  ⚠ Chapters are auto-placeholders — author real ones from transcript.md before publishing.")
         return output
 
     def run(self, audio_path=None, video_path=None, skip_transcribe=False, preview=False,
@@ -708,22 +738,28 @@ class PodcastVideoBuilder:
         if files["notes"]:
             print(f"  Notes: {files['notes'].name}")
 
+        original_audio_file = files["audio"]
+
         # 2. Setup
         print("\n2. Setting up directories...")
         self.setup_directories()
 
-        # 2.5 Intro / outro
+        # 2.5 Intro + outro
         print("\n2.5. Resolving intro/outro...")
-        episode_audio = files["audio"]
         intro_audio = self.resolve_intro_audio(intro_audio_path, intro_text_path, no_intro)
-        if not intro_audio:
+        if intro_audio:
+            print(f"  Intro ready: {intro_audio.name}")
+        else:
             print("  No intro found, skipping.")
+
         outro_audio = self.resolve_outro_audio(outro_audio_path, outro_text_path, no_outro)
-        if not outro_audio:
+        if outro_audio:
+            print(f"  Outro ready: {outro_audio.name}")
+        else:
             print("  No outro found, skipping.")
 
         if intro_audio or outro_audio:
-            combined = self.assemble_audio(episode_audio, intro_audio, outro_audio)
+            combined = self.assemble_audio(files["audio"], intro_audio, outro_audio)
             if not combined:
                 return False
             files["audio"] = combined
@@ -749,7 +785,7 @@ class PodcastVideoBuilder:
         self.generate_transcript_markdown(transcript_json, files["audio"])
         chapters = self.generate_chapters(transcript_json)
         self.generate_subtitles(transcript_json)
-        self.generate_upload_info(files["audio"], chapters, final_video)
+        self.generate_upload_info(original_audio_file, chapters, final_video, files["notes"])
 
         print("\n" + "="*60)
         print("✓ COMPLETE! All files ready in ./edit/")

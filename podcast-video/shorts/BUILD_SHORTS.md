@@ -140,11 +140,17 @@ THEMES = {
 
 ### Caption Styles
 
-Edit `shorts/captions_hyperframes/template.html` for different animation styles:
+Edit `shorts/hyperframes_overlays/captions.html` for different animation styles:
 - Change font family
 - Adjust animation timing
 - Modify highlight colors
 - Add effects
+
+Caption text is pinned to the bottom edge of the cross-platform safe
+zone (`shorts/safe_zones.json`), not centered, so it clears both
+TikTok's and Instagram/Facebook Reels' UI chrome after repost. Don't
+move the caption container out of `.safe-zone` without checking the
+margins in `safe_zones.json` first — see `hyperframes_overlays/safe-zone.css`.
 
 ## Requirements
 

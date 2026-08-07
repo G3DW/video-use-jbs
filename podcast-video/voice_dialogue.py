@@ -88,6 +88,10 @@ def build_turns(words):
         text = re.sub(r"\s+([.,!?])", r"\1", text)
         if not text:
             continue
+        # ElevenLabs rejects turns that are nothing but a bracketed audio-event
+        # tag (e.g. a standalone "[laughs]") once it strips tags server-side.
+        if not re.sub(r"\[[^\]]*\]", "", text).strip():
+            continue
         clean_turns.append({"speaker": t["speaker"], "text": text, "has_event": t["has_event"]})
     return clean_turns
 

@@ -51,6 +51,7 @@ Two-pass workflow:
 
 import argparse
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -105,6 +106,27 @@ ICON_LIBRARY = {
       <rect x="3" y="4" width="18" height="4" rx="2" fill="#FFEB3B"/>
       <rect x="7" y="1.5" width="2" height="4" rx="1" fill="#0F1C2B"/>
       <rect x="15" y="1.5" width="2" height="4" rx="1" fill="#0F1C2B"/>
+    </svg>''',
+    "no-check": '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 12.5 L10 17.5 L19 6.5" stroke="#0F1C2B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="3.5" y1="20.5" x2="20.5" y2="3.5" stroke="#0F1C2B" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>''',
+    "flask": '''<svg viewBox="0 0 24 24" fill="#0F1C2B" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9.5 2.5h5v1.6h-1v6.1l5.3 9.1a1.4 1.4 0 0 1-1.2 2.2H6.4a1.4 1.4 0 0 1-1.2-2.2l5.3-9.1V4.1h-1V2.5z"/>
+      <path d="M7.6 15.3h8.8l2.1 3.6H5.5z" fill="#FFEB3B"/>
+    </svg>''',
+    "lock": '''<svg viewBox="0 0 24 24" fill="#0F1C2B" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7 10V7.5a5 5 0 0 1 10 0V10" fill="none" stroke="#0F1C2B" stroke-width="2"/>
+      <rect x="4.5" y="10" width="15" height="11" rx="2.5"/>
+      <circle cx="12" cy="15" r="1.6" fill="#FFEB3B"/>
+      <rect x="11.2" y="15.5" width="1.6" height="3" rx="0.8" fill="#FFEB3B"/>
+    </svg>''',
+    "sync-break": '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 12a8 8 0 0 1 13-6.2" stroke="#0F1C2B" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M17 3v4h-4" stroke="#0F1C2B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M20 12a8 8 0 0 1-13 6.2" stroke="#0F1C2B" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M7 21v-4h4" stroke="#0F1C2B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="3" y1="21" x2="21" y2="3" stroke="#FFEB3B" stroke-width="2.4" stroke-linecap="round"/>
     </svg>''',
 }
 
@@ -984,6 +1006,53 @@ def build(args):
         print(f"[done] rendered -> {project / 'output.mp4'}")
 
 
+def finalize(args):
+    """Promote hf-broll/output.mp4 (the B-roll composition — the true final
+    deliverable) to the top-level episode video, and refresh edit/youtube-info.md's
+    Duration/File Size against it. build_video.py writes youtube-info.md against
+    its own pre-B-roll render; without this step that doc goes stale the moment
+    the B-roll pass produces a bigger/different final file."""
+    episode_dir = Path(args.episode_dir).resolve()
+    broll_output = episode_dir / "hf-broll" / "output.mp4"
+    if not broll_output.exists():
+        sys.exit(f"[error] {broll_output} not found — run `build --render` or the hyperframes render step first")
+
+    if args.output:
+        final_video = Path(args.output)
+        if not final_video.is_absolute():
+            final_video = episode_dir / final_video
+    else:
+        existing = [f for f in episode_dir.glob("*.mp4") if f.name != "brand-loop.mp4"]
+        if not existing:
+            sys.exit("[error] --output not given and no top-level *-final.mp4 found to infer the name from")
+        final_video = existing[0]
+
+    shutil.copyfile(broll_output, final_video)
+    print(f"[info] promoted {broll_output} -> {final_video}")
+
+    probe = subprocess.run(
+        ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", str(final_video)],
+        capture_output=True, text=True, check=True,
+    )
+    info = json.loads(probe.stdout)["format"]
+    duration = float(info["duration"])
+    size_mb = int(info["size"]) / (1024 * 1024)
+    duration_str = f"{int(duration // 60)}:{int(duration % 60):02d}"
+
+    info_path = episode_dir / "edit" / "youtube-info.md"
+    if not info_path.exists():
+        sys.exit(f"[error] {info_path} not found — run build_video.py first")
+
+    text = info_path.read_text()
+    text, n_dur = re.subn(r"(\*\*Duration:\*\*).*", rf"\1 {duration_str}", text, count=1)
+    text, n_size = re.subn(r"(\*\*File Size:\*\*).*", rf"\1 {size_mb:.0f} MB", text, count=1)
+    text, n_video = re.subn(r"(- Video: `).*(`)", rf"\1{final_video.name}\2", text, count=1)
+    if not (n_dur and n_size):
+        print("[warn] could not find Duration/File Size lines in youtube-info.md to update — check its format")
+    info_path.write_text(text)
+    print(f"[done] refreshed Duration ({duration_str}) and File Size ({size_mb:.0f} MB) in {info_path}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate a HyperFrames B-roll composition for a podcast episode")
     sub = parser.add_subparsers(dest="mode", required=True)
@@ -1005,11 +1074,19 @@ def main():
     build_p.add_argument("--transcript", default=None, help="defaults to edit/transcripts/combined_audio.json")
     build_p.add_argument("--render", action="store_true", help="also run hyperframes render after building")
 
+    finalize_p = sub.add_parser("finalize", help="promote hf-broll/output.mp4 to the top-level final video and refresh youtube-info.md")
+    finalize_p.add_argument("--episode-dir", required=True)
+    finalize_p.add_argument("--output", default=None,
+                             help="top-level final video path to promote into; defaults to the existing "
+                                  "*-final.mp4 in episode-dir (excluding brand-loop.mp4)")
+
     args = parser.parse_args()
     if args.mode == "stage":
         stage(args)
     elif args.mode == "build":
         build(args)
+    elif args.mode == "finalize":
+        finalize(args)
 
 
 if __name__ == "__main__":

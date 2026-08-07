@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Outro CTA Card (safe-zone)</title>
+    <style>/*
+ * Cross-platform safe zone (TikTok ∩ Reels/Facebook) for 9:16 shorts.
+ * Values are injected at render time from ../safe_zones.json — do not
+ * hardcode different numbers here; keep safe_zones.json as the single
+ * source of truth and let the {{SAFE_*}} placeholders below get replaced.
+ */
+:root {
+  --safe-top: 220px;
+  --safe-bottom: 420px;
+  --safe-left: 60px;
+  --safe-right: 120px;
+}
+
+/* Absolute-positioned box that excludes the unsafe margin on all four
+ * edges. Place overlay content (captions, lower-thirds, badges) inside
+ * this, not directly on the stage/body. */
+.safe-zone {
+  position: absolute;
+  left: var(--safe-left);
+  top: var(--safe-top);
+  right: var(--safe-right);
+  bottom: var(--safe-bottom);
+  box-sizing: border-box;
+}
+</style>
+    <style>/*
+ * JoeBuildsSystems / Daily AI Pulse brand tokens, mirrored from the
+ * horizontal (16:9) B-roll composition (generate_broll.py output) so the
+ * vertical shorts share one visual language. Update both if the brand
+ * palette changes.
+ */
+@font-face { font-family: "Inter"; src: url("fonts/Inter-400-latin.woff2") format("woff2"); font-weight: 400; font-display: block; }
+@font-face { font-family: "Inter"; src: url("fonts/Inter-700-latin.woff2") format("woff2"); font-weight: 700; font-display: block; }
+@font-face { font-family: "SF Mono"; src: url("fonts/SFNSMono.ttf") format("truetype"); font-weight: 400 700; font-display: block; }
+@font-face { font-family: "SF Pro Rounded"; src: url("fonts/SFNSRounded.ttf") format("truetype"); font-weight: 400 900; font-display: block; }
+
+:root {
+  --brand-bg: #1B2A3B;
+  --brand-card-bg: #0F1C2B;
+  --brand-accent-0: #4DD9C0;
+  --brand-accent-1: #5BCFEA;
+  --brand-accent-2: #8B9FD4;
+  --brand-accent-3: #E8590C;
+  --brand-accent-4: #9C36B5;
+  --brand-text: #FFFFFF;
+  --brand-text-light: #A8B8CC;
+  --brand-font: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --brand-mono-font: "SF Mono", "Inter", monospace;
+  /* Hero/display font — matches the horizontal video's big titles and
+     stat numbers (generate_broll.py); reserved for headline-weight text,
+     not body copy. */
+  --brand-display-font: "SF Pro Rounded", "Inter", sans-serif;
+}
+</style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--brand-bg);
+            font-family: var(--brand-font);
+        }
+
+        #stage {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Background image is copied in as bg-image.png at render time
+           (see render_shorts.py) — same still used for the rest of the
+           short, so the outro reads as a continuation, not a cut. */
+        .bg {
+            position: absolute;
+            inset: 0;
+            background-image: url("bg-image.png");
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Translucent panel, matching the horizontal video's outro card
+           (generate_broll.py card-07: rgba(27,42,59,0.92)). */
+        .panel {
+            position: absolute;
+            inset: 0;
+            background: rgba(27, 42, 59, 0.92);
+            opacity: 0;
+        }
+
+        .safe-zone {
+            position: absolute;
+            left: var(--safe-left);
+            top: var(--safe-top);
+            right: var(--safe-right);
+            bottom: var(--safe-bottom);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .wordmark {
+            font-family: var(--brand-display-font);
+            font-size: 64px;
+            font-weight: 800;
+            color: var(--brand-text);
+            line-height: 1.2;
+            margin-bottom: 40px;
+            opacity: 0;
+        }
+
+        .tagline {
+            font-family: var(--brand-mono-font);
+            font-size: 32px;
+            letter-spacing: 4px;
+            color: var(--brand-accent-1);
+            text-transform: uppercase;
+            font-weight: 700;
+            opacity: 0;
+        }
+
+        .handle {
+            margin-top: 28px;
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--brand-text-light);
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div
+        id="stage"
+        data-composition-id="shorts-outro-card"
+        data-start="0"
+        data-duration="2.0"
+        data-fps="30"
+        data-width="1080"
+        data-height="1920"
+    >
+        <div class="bg"></div>
+        <div class="panel" id="panel"></div>
+        <div class="safe-zone">
+            <div class="center">
+                <div class="wordmark" id="wordmark">The Daily AI Pulse Podcast</div>
+                <div class="tagline" id="tagline">Full Episode Available</div>
+                <div class="handle" id="handle">@JoeBuildsSystems on YouTube</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="vendor/gsap.min.js"></script>
+    <script>
+        const tl = gsap.timeline({ paused: true });
+
+        tl.to('#panel', { opacity: 1, duration: 0.35, ease: 'power2.out' }, 0.05);
+        tl.to('#wordmark', { opacity: 1, duration: 0.35, ease: 'power2.out' }, 0.25);
+        tl.to('#tagline', { opacity: 1, duration: 0.3, ease: 'power2.out' }, 0.55);
+        tl.to('#handle', { opacity: 1, duration: 0.3, ease: 'power2.out' }, 0.75);
+
+        window.__timelines = window.__timelines || {};
+        window.__timelines['shorts-outro-card'] = tl;
+    </script>
+</body>
+</html>

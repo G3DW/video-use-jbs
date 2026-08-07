@@ -61,16 +61,18 @@ def create_intro_card(chapter_number, chapter_title, total_chapters, output_path
         subtitle_font = ImageFont.load_default()
         meta_font = ImageFont.load_default()
 
-    # Top accent bar
+    # Top accent bar (decorative bleed to the canvas edge is fine — only
+    # readable text has to respect the cross-platform safe box, see
+    # ../safe_zones.json: cross_post_safe.top = 220px)
     draw.rectangle([0, 0, width, 8], fill=accent_color)
 
-    # Brand name (top)
-    brand_y = 200
+    # Brand name (top) — kept below the 220px safe-zone top margin
+    brand_y = 260
     draw.text((width // 2, brand_y), brand_name,
              fill=(150, 150, 150), font=meta_font, anchor="mm")
 
     # Chapter indicator
-    indicator_y = 300
+    indicator_y = 340
     indicator_text = f"Chapter {chapter_number} of {total_chapters}"
     draw.text((width // 2, indicator_y), indicator_text,
              fill=(110, 110, 110), font=meta_font, anchor="mm")
@@ -182,8 +184,10 @@ def create_outro_card(output_path, brand_handle="@dailyaipulse",
              fill=(110, 110, 110), font=subtitle_font, anchor="mm")
 
     # Optional: Simple QR code placeholder (can be added later)
-    # For now, just a decorative element
-    qr_y = 1400
+    # For now, just a decorative element. Kept above the 1500px safe-zone
+    # bottom boundary (canvas 1920 - cross_post_safe.bottom 420) so it
+    # clears TikTok's and Reels' bottom UI.
+    qr_y = 1350
     qr_size = 200
     qr_bbox = [
         width // 2 - qr_size // 2,

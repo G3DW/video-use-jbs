@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Story Callouts (safe-zone)</title>
+    <link rel="stylesheet" href="safe-zone.css">
+    <link rel="stylesheet" href="brand.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: transparent;
+            font-family: var(--brand-font);
+        }
+
+        #stage {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Anchored to the TOP of the safe zone, well clear of the
+           bottom-pinned caption block, so callout chips never collide
+           with caption text. */
+        .callout-zone {
+            position: absolute;
+            left: var(--safe-left);
+            right: var(--safe-right);
+            top: calc(var(--safe-top) + 80px);
+            display: flex;
+            justify-content: center;
+        }
+
+        .callout-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 20px;
+            max-width: 100%;
+            padding: 24px 32px;
+            border-radius: 20px;
+            background: rgba(15, 28, 43, 0.88);
+            border-left: 8px solid var(--chip-accent, var(--brand-accent-0));
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* Colored circular badge behind the glyph — matches the horizontal
+           video's icon-badge convention (generate_broll.py ICON_LIBRARY:
+           dark glyph on a bright accent-colored circle). */
+        .callout-icon {
+            flex: 0 0 auto;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: var(--chip-accent, var(--brand-accent-0));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .callout-icon svg {
+            width: 40px;
+            height: 40px;
+        }
+
+        .callout-text {
+            font-size: 40px;
+            font-weight: 700;
+            color: var(--brand-text);
+            line-height: 1.2;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div
+        id="stage"
+        data-composition-id="shorts-callouts"
+        data-start="0"
+        data-duration="{{DURATION}}"
+        data-fps="30"
+        data-width="1080"
+        data-height="1920"
+    >
+        <div class="callout-zone">
+            <div class="callout-container" id="calloutContainer" style="position: relative; width: 100%;"></div>
+        </div>
+    </div>
+
+    <script src="vendor/gsap.min.js"></script>
+    <script>
+        // Callout data injected at render time — see render_shorts.py.
+        // Each item: { text, icon (resolved inline SVG markup, or empty),
+        // accent, start, end } (times in seconds, already shifted to this
+        // composition's local clock).
+        const CALLOUTS = {{CALLOUTS_DATA}};
+
+        const container = document.getElementById('calloutContainer');
+
+        CALLOUTS.forEach((c, index) => {
+            const chip = document.createElement('div');
+            chip.className = 'callout-chip';
+            chip.id = `callout-${index}`;
+            chip.style.position = 'relative';
+            if (c.accent) chip.style.setProperty('--chip-accent', c.accent);
+            chip.innerHTML = `
+                <span class="callout-icon">${c.icon || ''}</span>
+                <span class="callout-text">${c.text}</span>
+            `;
+            container.appendChild(chip);
+        });
+
+        // One paused, synchronously-built GSAP timeline — deterministic
+        // and seekable. autoAlpha is allowed on these non-clip elements.
+        const tl = gsap.timeline({ paused: true });
+
+        CALLOUTS.forEach((c, index) => {
+            const el = document.getElementById(`callout-${index}`);
+            tl.set(el, { autoAlpha: 0, scale: 0.92 }, Math.max(0, c.start - 0.01));
+            tl.to(el, { autoAlpha: 1, scale: 1, duration: 0.25, ease: 'power2.out' }, c.start);
+            tl.to(el, { autoAlpha: 0, duration: 0.25, ease: 'power2.in' }, c.end - 0.25);
+        });
+
+        window.__timelines = window.__timelines || {};
+        window.__timelines['shorts-callouts'] = tl;
+    </script>
+</body>
+</html>

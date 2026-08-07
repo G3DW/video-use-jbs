@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Animated Captions (safe-zone)</title>
+    <link rel="stylesheet" href="safe-zone.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: transparent;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        #stage {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Captions pin to the bottom edge of the safe zone (as low as
+           the platform-chrome margins allow) rather than dead-center,
+           which is where the old template placed them. */
+        .safe-zone {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        /* Zero-height positioning anchor: children are all absolutely
+           positioned off it, so only one chunk (~5 words) is ever visible
+           at a time — captions stay inside the safe box no matter how
+           long the underlying transcript segment is, instead of piling up
+           every word in the chapter into one endless block. */
+        .caption-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .caption-chunk {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            text-align: center;
+            padding-bottom: 24px;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .word {
+            display: inline-block;
+            font-size: 72px;
+            font-weight: 800;
+            color: #FFFFFF;
+            text-shadow:
+                2px 2px 4px rgba(0, 0, 0, 0.9),
+                0 0 20px rgba(0, 0, 0, 0.5);
+            margin: 0 8px 16px 8px;
+            opacity: 0.5;
+            transform: scale(0.9);
+            transform-origin: center;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        .highlight {
+            position: absolute;
+            bottom: 8px;
+            left: -4px;
+            right: -4px;
+            height: 24px;
+            background: #FFEB3B;
+            z-index: -1;
+            opacity: 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div
+        id="stage"
+        data-composition-id="shorts-captions"
+        data-start="0"
+        data-duration="{{DURATION}}"
+        data-fps="30"
+        data-width="1080"
+        data-height="1920"
+    >
+        <div class="safe-zone">
+            <div class="caption-container" id="captionContainer"></div>
+        </div>
+    </div>
+
+    <script src="vendor/gsap.min.js"></script>
+    <script>
+        // Word timing data injected at render time — see render_shorts.py
+        const WORDS = {{WORDS_DATA}};
+        const WORDS_PER_CHUNK = 5;
+
+        const container = document.getElementById('captionContainer');
+
+        // Group words into fixed-size chunks (deterministic — no timing
+        // heuristics) so only ~1-2 lines are ever on screen at once.
+        const chunks = [];
+        for (let i = 0; i < WORDS.length; i += WORDS_PER_CHUNK) {
+            chunks.push(WORDS.slice(i, i + WORDS_PER_CHUNK).map((w, j) => ({ ...w, globalIndex: i + j })));
+        }
+
+        chunks.forEach((chunk, chunkIndex) => {
+            const chunkEl = document.createElement('div');
+            chunkEl.className = 'caption-chunk';
+            chunkEl.id = `chunk-${chunkIndex}`;
+            chunk.forEach((wordData) => {
+                const wordSpan = document.createElement('span');
+                wordSpan.className = 'word';
+                wordSpan.id = `word-${wordData.globalIndex}`;
+                wordSpan.innerHTML = `<span class="highlight"></span>${wordData.text}`;
+                chunkEl.appendChild(wordSpan);
+            });
+            container.appendChild(chunkEl);
+        });
+
+        // One paused, synchronously-built GSAP timeline keyed to word
+        // start/end times — deterministic and seekable, unlike the old
+        // requestAnimationFrame/wall-clock loop this replaced.
+        const tl = gsap.timeline({ paused: true });
+
+        chunks.forEach((chunk, chunkIndex) => {
+            const chunkEl = document.getElementById(`chunk-${chunkIndex}`);
+            const chunkStart = chunk[0].start;
+            const chunkEnd = chunk[chunk.length - 1].end;
+
+            tl.set(chunkEl, { autoAlpha: 1 }, chunkStart);
+            tl.set(chunkEl, { autoAlpha: 0 }, chunkEnd);
+
+            chunk.forEach((wordData) => {
+                const wordEl = document.getElementById(`word-${wordData.globalIndex}`);
+                const highlightEl = wordEl.querySelector('.highlight');
+                tl.set(wordEl, { opacity: 1, scale: 1 }, wordData.start);
+                tl.set(highlightEl, { opacity: 1 }, wordData.start);
+                tl.set(wordEl, { opacity: 0.5, scale: 1 }, wordData.end);
+                tl.set(highlightEl, { opacity: 0 }, wordData.end);
+            });
+        });
+
+        window.__timelines = window.__timelines || {};
+        window.__timelines['shorts-captions'] = tl;
+    </script>
+</body>
+</html>

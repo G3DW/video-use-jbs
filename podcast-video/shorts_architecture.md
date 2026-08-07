@@ -189,12 +189,13 @@ Each chapter gets visual identity:
 ├── shorts/
 │   ├── render_shorts.py          # Main orchestrator
 │   ├── extract_chapters.py       # Audio/transcript segmentation
-│   ├── create_intro_card.py      # Intro card generator
-│   ├── create_outro_card.py      # Outro card generator
-│   ├── captions_hyperframes/     # HyperFrames caption engine
-│   │   ├── template.html
-│   │   ├── captions.js
-│   │   └── styles.css
+│   ├── create_cards.py           # Intro/outro card generator
+│   ├── safe_zones.json           # Canonical cross-platform (TikTok ∩ Reels/FB) safe-zone margins
+│   ├── hyperframes_overlays/     # HyperFrames overlay templates, safe-zone-aware
+│   │   ├── safe-zone.css         # --safe-* custom props + .safe-zone class, filled from safe_zones.json
+│   │   ├── captions.html         # word-by-word captions, pinned to safe-zone bottom edge
+│   │   ├── lower-third.html      # title/subtitle bar
+│   │   └── chapter-badge.html    # "Chapter N/Total" indicator
 │   ├── themes.json               # Chapter visual themes
 │   └── config.json               # Shorts config
 ```

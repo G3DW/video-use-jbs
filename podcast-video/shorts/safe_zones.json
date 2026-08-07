@@ -1,0 +1,9 @@
+{
+  "_comment": "Cross-platform safe zone for 9:16 shorts that get posted to TikTok and auto-repost to Instagram/Facebook Reels. cross_post_safe is the max (most restrictive) margin per edge across both platforms — this is the box every overlay's actual text/graphics must stay inside. Source of truth for render_shorts.py, create_cards.py, hyperframes_overlays/*, and qa-episode's safe-area check.",
+  "canvas": { "width": 1080, "height": 1920 },
+  "platforms": {
+    "tiktok": { "top": 108, "bottom": 320, "left": 60, "right": 120 },
+    "reels_fb": { "top": 220, "bottom": 420, "left": 35, "right": 35 }
+  },
+  "cross_post_safe": { "top": 220, "bottom": 420, "left": 60, "right": 120 }
+}

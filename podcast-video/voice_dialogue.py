@@ -12,7 +12,7 @@ Usage:
   python3 voice_dialogue.py \
       --transcript path/to/transcript.json \
       --male-voice-id 8579yP6p1e1Pydb8F0dg \
-      --female-voice-id OYTbf65OHHFELVut7v2H \
+      --female-voice-id OJCbLZ3pVlUtXom8IpZV \
       --out-dir path/to/edit/dialogue \
       --output path/to/edit/final_narration.mp3
 """

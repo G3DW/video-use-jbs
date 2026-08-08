@@ -49,7 +49,7 @@ def load_api_key():
     sys.exit("[error] ELEVENLABS_API_KEY not found in environment or .env")
 
 DEFAULT_MALE_VOICE_ID = "8579yP6p1e1Pydb8F0dg"    # Digital Joey Voice (cloned)
-DEFAULT_FEMALE_VOICE_ID = "OYTbf65OHHFELVut7v2H"  # Hope - natural conversations
+DEFAULT_FEMALE_VOICE_ID = "OJCbLZ3pVlUtXom8IpZV"  # Hope - natural conversations
 
 TRANSCRIBE_SCRIPT = Path("/Users/joey_makes_stuff/Documents/GitHub/video-use/helpers/transcribe.py")
 VENV_PYTHON = Path("/Users/joey_makes_stuff/Documents/GitHub/video-use/.venv/bin/python")

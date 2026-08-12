@@ -63,6 +63,31 @@ The skill will:
 - Run the complete production pipeline
 - Output everything to `./edit/` directory
 
+## Source File Auto-Discovery (Daily Pipeline)
+
+For the daily NotebookLM-episode pipeline, don't ask where the source files are — they always live under the same vault root and are found the same way every time:
+
+```
+~/Documents/AgenticOS/JoeBuildsSystems/
+```
+
+Resolve all three inputs from there before starting the pipeline:
+
+1. **Episode audio** — `Content/`, most recent subfolder matching `YYYY-MM-DD-podcast` (sort by the date in the folder name, not mtime). The NotebookLM raw two-speaker dialogue export is the `.mp3`/`.m4a` inside it (filename starts `niche-pulse-`). This date (`YYYY-MM-DD`) is the episode date and drives the lookups below.
+   ```bash
+   ls -d ~/Documents/AgenticOS/JoeBuildsSystems/Content/*-podcast | sort | tail -1
+   ```
+2. **Niche Pulse research note** — `Raw/` (top level, not `Raw/assets/` or `Raw/Last30Days/`), file matching `niche-pulse-*-<episode-date>.md` — filename is always `niche-pulse-<slug>-YYYY-MM-DD.md`, date suffix at the end.
+   ```bash
+   ls ~/Documents/AgenticOS/JoeBuildsSystems/Raw/niche-pulse-*-<episode-date>.md
+   ```
+3. **Last30Days sweep** — `Raw/Last30Days/`, file matching `*-raw-v3.md`. These filenames carry no date — match by the `updated: YYYY-MM-DD` field in the file's YAML frontmatter instead, not the filename or mtime. If no file's `updated` matches the episode date exactly, fall back to the one with the most recent `updated` value.
+   ```bash
+   grep -l "^updated: <episode-date>" ~/Documents/AgenticOS/JoeBuildsSystems/Raw/Last30Days/*-raw-v3.md
+   ```
+
+These three feed the pipeline's later steps: the episode audio is step 1's input, the niche-pulse note and Last30Days sweep are the "richer than transcript alone" sourcing for Blog Repurposing (see below). Resolve them once at the start of a daily run rather than re-deriving per step.
+
 ## Input Requirements
 
 Place these files in your working directory:

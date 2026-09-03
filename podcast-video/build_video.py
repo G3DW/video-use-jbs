@@ -21,6 +21,19 @@ NEWSLETTER_URL = "https://weekly.joebuildsai.com"
 CHANNEL_TAGS = ["joeBuilds Systems", "AI News", "Daily AI Pulse", "AI Agents"]
 CHANNEL_HASHTAGS = ["#AI", "#AIAgents", "#AINews"]
 
+# The one background loop every daily episode renders against. This is a
+# constant, skill-owned asset (added 2026-09-03 after an episode accidentally
+# rendered against an unrelated portrait-orientation file some agents found
+# by globbing the user's ~/Documents folder) — it never changes per-episode
+# and must never be re-discovered by searching the filesystem. Confirmed
+# against the Drive-archived brand-loop.mp4 used on every episode from at
+# least 2026-08-13 through 2026-08-28 (identical 1,723,514-byte file each
+# day; 1280x720, 14s). Pass --video explicitly only for a genuine one-off
+# special-episode override (see README's "Custom styling for special
+# episode" example) — the default path here is what every normal daily run
+# should resolve to.
+BRAND_LOOP_PATH = Path.home() / ".claude/skills/podcast-video/brand-assets/brand-loop.mp4"
+
 class PodcastVideoBuilder:
     def __init__(self, config_path=None):
         self.script_dir = Path(__file__).parent
@@ -104,11 +117,21 @@ class PodcastVideoBuilder:
         if video_path:
             files["video"] = Path(video_path)
         else:
-            # Find video file (excluding any in edit/ dir)
-            video_files = [f for f in self.working_dir.glob("*.mp4")
-                          if "edit" not in str(f)]
-            if video_files:
-                files["video"] = video_files[0]
+            # Always use the fixed, skill-owned brand loop — never search
+            # the working directory or the wider filesystem for a
+            # plausible-looking .mp4. If it's missing, stop and say so
+            # rather than guessing at a substitute (see BRAND_LOOP_PATH).
+            if not BRAND_LOOP_PATH.exists():
+                sys.exit(
+                    f"[error] brand loop not found at {BRAND_LOOP_PATH}\n"
+                    f"This is the fixed, always-the-same background video every daily "
+                    f"episode renders against. It must exist at that exact path — this "
+                    f"script will not search anywhere else for a substitute. Confirm "
+                    f"with Joe where the current brand-loop.mp4 is (or restore it from "
+                    f"the Drive archive) and place it there before re-running, or pass "
+                    f"--video explicitly for a genuine one-off override."
+                )
+            files["video"] = BRAND_LOOP_PATH
 
         # Find notes
         notes_files = list(self.working_dir.glob("*.md"))

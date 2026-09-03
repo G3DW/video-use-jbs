@@ -16,25 +16,55 @@ This repo owns the *scripts* (`regenerate_dialogue.py`, `build_video.py`,
 It does not own the orchestration — that lives in the Cowork
 `daily-podcast-pipeline` skill, which morning-pulse now chains into
 automatically every morning once the NotebookLM audio deep-dive is ready.
-That skill:
+That skill must run one continuous local completion workflow:
 
-1. Runs `regenerate_dialogue.py` → `build_video.py` and promotes the result
-   to `<JoeBuildsSystems>/Content/<date>-podcast/daily-ai-pulse-<date>-final.mp4`
-   ("Tier 1" — plain rendered episode, YouTube-uploadable as-is).
-2. Runs `generate_broll.py stage` and hand-drafts `storyboard.json`, then
-   **stops** — it does not run `generate_broll.py build` or the hyperframes
-   render automatically. Card selection (which stat/quote/moment gets a
-   card) is a judgment call Joe wants visibility into before it renders, so
-   the pipeline pauses here and notifies him.
-3. Only runs `generate_broll.py build` + the hyperframes render ("Tier 2")
-   when Joe explicitly says "approve today's broll" / "render broll for
-   &lt;date&gt;" in a later message.
+1. Run `regenerate_dialogue.py` → `build_video.py` and promote the base
+   render to `<JoeBuildsSystems>/Content/<date>-podcast/daily-ai-pulse-<date>-final.mp4`.
+2. Generate the thumbnail, author the B-roll storyboard, build/render/promote
+   the HyperFrames B-roll pass, and draft the blog post.
+3. Run final QA and save its PASS/FAIL record before reporting completion.
+
+**Do not request separate approval for B-roll, the thumbnail, or the blog
+draft.** They are mandatory output gates for every episode. Make the needed
+editorial judgments autonomously from the brief, transcript, and research.
+Only stop for a real blocker (missing source material, failed required tool,
+or unavailable account) and report the episode as blocked — never complete.
 
 See `[[JoeBuildsSystems/Projects/morning-pulse-pipeline]]` in the AgenticOS
 vault for the full end-to-end architecture (morning brief → audio → this
 repo → YouTube-ready folder) and the canonical `Content/<date>-podcast/`
 folder contract, which daily-podcast-pipeline enforces so output doesn't
 drift day to day the way it did 2026-07-25 through 2026-07-27.
+
+## Schedule and Local Retention (as of 2026-08-24)
+
+**Weekends are off.** The daily pipeline runs Monday–Friday only — no full
+podcast production on Saturday or Sunday. Whatever triggers the daily run
+(morning-pulse chaining into the Cowork `daily-podcast-pipeline` skill, or a
+manual `/podcast-video` invocation for "today") must check the episode date
+first: if it falls on a Saturday or Sunday, skip production entirely and do
+not report it as blocked/missed — a weekend with no episode is expected
+behavior, not a gap to fill retroactively. If NotebookLM still drops a
+weekend audio file into `Content/<date>-podcast/`, leave it in place
+unprocessed; Monday's run should not attempt to catch up on it.
+
+**48-hour local retention, then Drive archival.** `Content/<date>-podcast/`
+folders are archived to Google Drive and removed from local disk ~48 hours
+after the episode date to avoid unbounded local storage growth. Practical
+implications:
+- Any step that reads from a `Content/<date>-podcast/` folder should expect
+  it to exist locally only for freshly-produced or very recent episodes
+  (today, yesterday). For anything older, assume it's Drive-only.
+- When a step needs an older episode's files (backfills, re-derived
+  chapters, pulling a past thumbnail/asset for reference) and the local
+  path is missing or a local `CloudStorage` mount read fails (e.g.
+  `Resource deadlock avoided`), fall back to the Google Drive API
+  (`search_files` for the file ID, `download_file_content` to fetch it) the
+  same way the Blog Repurposing backfill flow already does — see
+  "Backfilling past episodes" below — rather than treating a missing local
+  folder as an error.
+- Don't build tooling that assumes today's `Content/<date>-podcast/` folder
+  will still be on disk 3+ days later.
 
 ## What This Skill Does
 
@@ -88,12 +118,36 @@ Resolve all three inputs from there before starting the pipeline:
 
 These three feed the pipeline's later steps: the episode audio is step 1's input, the niche-pulse note and Last30Days sweep are the "richer than transcript alone" sourcing for Blog Repurposing (see below). Resolve them once at the start of a daily run rather than re-deriving per step.
 
+### The brand loop is a fixed asset, not something to discover per episode
+
+Added 2026-09-03 after an episode accidentally rendered against an unrelated
+portrait-orientation video some agents found by globbing the user's
+`~/Documents` folder for a plausible-looking `.mp4`. The daily brand loop
+**never changes** — it's the same 1280x720, 14s file every single day
+(confirmed identical, byte-for-byte, in the Drive archive from at least
+2026-08-13 through 2026-08-28) — so `build_video.py` now reads it from a
+fixed, skill-owned path instead of searching for it:
+
+```
+~/.claude/skills/podcast-video/brand-assets/brand-loop.mp4
+```
+
+Do not search the filesystem for a brand video, do not glob the working
+directory, and do not guess from a filename that "sounds right." If that
+path is missing, `build_video.py` now hard-fails with an explicit error
+instead of silently substituting something else — stop and ask Joe where
+the current file is (or restore it from the Drive archive) rather than
+picking a replacement yourself. `--video <path>` still works as an explicit
+override for a genuine one-off special episode (see the "Custom styling for
+special episode" example below), but that's the only sanctioned way this
+ever changes.
+
 ## Input Requirements
 
 Place these files in your working directory:
 
 1. **Audio file**: `.mp3` or `.m4a` (your podcast episode)
-2. **Brand video**: `.mp4` (your logo/brand loop, ideally 5-10 seconds)
+2. *(Fixed asset, not per-episode)* **Brand video**: resolved automatically from `~/.claude/skills/podcast-video/brand-assets/brand-loop.mp4` — see above. Only pass `--video` if you're deliberately overriding it for a one-off episode.
 3. *(Optional)* **Episode notes**: `.md` file with show notes
 4. *(Optional)* **Intro script**: `intro.txt` — a ~30s (75-90 word) spoken intro framing what the episode covers. If present, it's synthesized in your cloned voice and prepended to the episode audio automatically. Before invoking the skill, draft this from the episode's brief/notes so it's fresh per-episode rather than a fixed template — `eleven_v3` audio/emotion tags (e.g. `[curious]`, `[excited]`) are supported inline for a more expressive read. You can also pass a ready-made intro directly with `--intro-audio <mp3>` or `--intro-text-file <txt>`, or skip it entirely with `--no-intro`.
 5. *(Optional)* **Outro script**: `outro.txt` — a ~20-30s spoken sign-off + CTA (thank listeners, ask for a like/comment/subscribe, tease tomorrow's episode). Same mechanism as `intro.txt`: draft it fresh per-episode before invoking the skill, synthesized in your cloned voice and appended to the end of the episode audio automatically. Without one, episodes just cut off after the last line. Override with `--outro-audio <mp3>` / `--outro-text-file <txt>`, or skip with `--no-outro`.
@@ -222,9 +276,30 @@ The daily episodes are NotebookLM-generated two-speaker dialogue audio (the raw 
      humanized transcript, not the raw one, is what storyboard-plan.json's
      anchorQuote fields should reference from that point on.
 
+0.5. (added 2026-09-01) fix_transcript_artifacts.py --transcript edit/source_transcript/transcripts/<stem>.humanized.json \
+     --output edit/source_transcript/transcripts/<stem>.humanized.artifact-fixed.json \
+     --report edit/source_transcript/transcripts/<stem>.artifact-fix-report.json
+   - Scribe reliably mishears a handful of technical terms/idioms in
+     NotebookLM's raw audio (SQL -> "Squill", CAPTCHA -> "KPTCA"/"KPTCAs",
+     "24/7" -> "two and four-seven"). Since Stage 0's transcript text IS
+     the script regenerate_dialogue.py hands to ElevenLabs, an uncorrected
+     mishearing doesn't just show up in captions — it gets spoken out loud
+     in the redub. Run this right after humanize_transcript.py and before
+     regenerate_dialogue.py so the corrected text is what actually gets
+     dubbed. Deterministic dictionary-based fixes only (WORD_ARTIFACTS /
+     PHRASE_ARTIFACTS in the script) — never fuzzy-match or guess, since a
+     wrong guess here becomes a wrong word spoken in the final audio.
+     Extend the dictionaries as new mishearings turn up in review.
+   - This same script can also be re-run against the SECOND transcription
+     pass (edit/transcripts/combined_audio.json, produced by step 3 below)
+     if that independent ASR run mishears something the first pass got
+     right (e.g. correctly-spoken "Claude" heard back as "Claw"). At that
+     point it's a caption-only correction — safe to run post-hoc, since
+     nothing feeds back into audio once the video's already rendered.
+
 1. regenerate_dialogue.py --audio raw_episode.m4a \
      --out-dir edit/dialogue --output edit/final_narration.mp3 \
-     --transcript edit/source_transcript/transcripts/<stem>.humanized.json \
+     --transcript edit/source_transcript/transcripts/<stem>.humanized.artifact-fixed.json \
      --speaker-map edit/speaker_map.json
    - `--transcript`/`--speaker-map` are optional (added 2026-08-04) — pass
      Stage 1's already-produced (humanized) transcript and speaker map here
@@ -265,6 +340,27 @@ The daily episodes are NotebookLM-generated two-speaker dialogue audio (the raw 
      chapters.txt placeholder
    - Output: edit/daily-ai-pulse-{date}-final.mp4
 
+3.5. (added 2026-09-01) normalize_caption_numbers.py --transcript edit/transcripts/combined_audio.json \
+     --output edit/transcripts/combined_audio.captions-final.json \
+     --report edit/transcripts/caption-normalize-report.json
+   - Display-only pass, the mirror image of step 0.5: correctly-spoken
+     dates, version numbers, and a couple of spoken-idiom numbers get
+     transcribed by Scribe as words ("August thirty-first, twenty
+     twenty-six", "two point o") because that's genuinely how they sound
+     out loud — nothing wrong with the audio, it just reads better as
+     digits on screen ("August 31, 2026", "2.0"). Never feed the output
+     back into TTS; some models mispronounce a raw digit date/version
+     string, so spoken audio stays as words on purpose.
+   - Run fix_transcript_artifacts.py first if step 0.5's note above found
+     anything in this same transcript, then this script, then regenerate
+     subtitles.srt/transcript.md/chapters.txt from the corrected file
+     (either build_video.py's PodcastVideoBuilder.generate_subtitles() /
+     generate_transcript_markdown() / generate_chapters() called directly
+     against the corrected json, or overwrite
+     edit/transcripts/combined_audio.json and re-run build_video.py
+     --skip-transcribe — the latter also re-renders the video, so prefer
+     calling the generator methods directly when only captions changed).
+
 4. Author real chapters + description (mandatory, every episode — see
    "Chapter Detection" below): read edit/transcript.md, hand-write real
    chapter titles into edit/chapters.txt and edit/youtube-info.md, and
@@ -278,7 +374,8 @@ The daily episodes are NotebookLM-generated two-speaker dialogue audio (the raw 
    Content/2026-MM-DD-podcast/thumbnails/. Do not hand-roll a thumbnail any
    other way (e.g. burning text over a video frame) — jbs-adhoc-cover is
    the one system of record for JBS cover art (locked reference photos,
-   brand colors, Renders tracker logging).
+   brand colors, Renders tracker logging). Choose the headline/subtitle/pose
+   autonomously; do not pause for approval.
 
 6. B-roll pass (title card burn-in + karaoke captions + hand-picked B-roll
    cards, including an outro CTA card synced to the spoken outro) via
@@ -292,6 +389,16 @@ The daily episodes are NotebookLM-generated two-speaker dialogue audio (the raw 
    count check), pick 2-4 content tags, and save it as a Beehiiv draft (or
    reviewable markdown, until the plan supports learn_post_authoring) —
    never auto-published.
+
+8. Draft the pinned YouTube comment (mandatory, every episode — see
+   "Pinned Comment" below): a short comment pointing viewers to the
+   companion blog post, written into `edit/youtube-info.md` with a
+   `[PASTE YOUTUBE VIDEO COMMENT LINK... ]`-style placeholder for the
+   Beehiiv post URL until that post is actually published.
+
+9. Run the `qa-episode` skill and save its PASS/FAIL table to
+   `logs/qa-episode-YYYY-MM-DD.log`. Do not call the episode complete until
+   every mandatory output and QA check passes.
 ```
 
 For single-narrator episodes (no diarized dialogue to regenerate), skip step 1 and run `build_video.py` directly on the raw audio, same as before.
@@ -305,8 +412,20 @@ Thumbnail generation is **not** part of `build_video.py`/`generate_broll.py` —
 1. Read the episode's brief.md/hook to infer `headline` (6-8 words, the curiosity-gap), optional `subtitle`, `poseDescription` (specific, e.g. "hand on chin, eyebrows raised, looking off to the side"), and `tagCategory` (`AI News` for most daily episodes).
 2. Invoke the `jbs-adhoc-cover` skill with those. It POSTs to the JBS Ad Hoc Cover Generator n8n webhook and returns `{ imageUrl, filename, headline }`.
 3. Download the returned image into `Content/2026-MM-DD-podcast/thumbnails/`.
+4. Immediately publish the saved image to Command Center's Viewscreen feed:
+   ```bash
+   python3 <video-use>/podcast-video/publish_viewscreen_asset.py \
+     --file Content/2026-MM-DD-podcast/thumbnails/<generated-cover> \
+     --type cover --title "<episode title>" --agent DAX \
+     --caption "YouTube thumbnail" --episode-date YYYY-MM-DD
+   ```
+   This is mandatory. The Viewscreen auto-shows the newest creative asset;
+   the same feed also accepts slideshow frames and chart exports. Do not wait
+   for a separate dashboard step or user approval.
 
-This is a per-episode judgment call (which moment/expression sells the video) the same way B-roll card content is — don't try to script the headline/pose inference away.
+This is a per-episode judgment call (which moment/expression sells the video)
+the same way B-roll card content is — make it autonomously from the episode
+materials. Do not ask for a separate thumbnail approval.
 
 ## B-Roll Pass
 
@@ -321,7 +440,8 @@ Card *content* — which stat, quote, or topic-marker moment gets a card, and it
    - Re-encodes the source video with dense keyframes for seekable rendering
    - Writes hf-broll/storyboard.json (schemaVersion 3, cards: []) if missing
 
-2. Hand-author storyboard.json's cards[] — same schema as
+2. Autonomously author storyboard.json's cards[] from the transcript, chapters,
+   and brief — do not ask for B-roll approval. Use the same schema as
    Content/2026-07-27-podcast/hf-broll/storyboard.json and
    Content/2026-07-28-podcast/hf-broll/storyboard.json: id, archetype,
    startSec, endSec, accentIndex (0-4), zone ("video-overlay"), contentHints
@@ -335,16 +455,46 @@ Card *content* — which stat, quote, or topic-marker moment gets a card, and it
      --content-start if it's ever wrong or missing
    - Reads edit/transcripts/combined_audio.json for caption word timing
    - Writes hf-broll/public/index.html
-   - Pass --render to also invoke `hyperframes render` immediately after
+   - Pass --render to also invoke `hyperframes render` immediately after.
+     This also auto-launches a `hyperframes preview` Studio server in the
+     background (log at hf-broll/preview.log) right before the render
+     starts, so Joe can watch the composition timeline at
+     http://localhost:3002 while the batch render runs — it's a live
+     preview of the authored composition, not a progress bar on the render
+     job itself. Pass --no-preview to skip this.
 
 4. cd Content/2026-MM-DD-podcast/hf-broll && PRODUCER_BROWSER_GPU_MODE=hardware \
      npx hyperframes render public --skill=talking-head-recut -o output.mp4 --fps 24
-   (skip if you passed --render in step 3)
+   (skip if you passed --render in step 3 — if running this standalone
+   instead, first launch `npx hyperframes preview public &` for the same
+   live-preview visibility)
 
-5. Spot-check with `npx hyperframes snapshot public --at <seconds>` at a few
-   card/caption moments, then promote hf-broll/output.mp4 to the top-level
-   Content/2026-MM-DD-podcast/daily-ai-pulse-{date}-final.mp4.
+5. Run `npx hyperframes check public`, spot-check with
+   `npx hyperframes snapshot public --at <seconds>` at title, card, caption,
+   and outro moments, then run `generate_broll.py finalize` to promote the
+   rendered composition to the top-level final. Do not defer this pass.
 ```
+
+## Production Completion Gate
+
+Before reporting an episode complete, verify all of the following exist and
+are substantive:
+
+- `daily-ai-pulse-YYYY-MM-DD-final.mp4` — B-roll-promoted final, with video
+  and audio streams.
+- `thumbnails/<generated-cover>` — created through `jbs-adhoc-cover`.
+- Command Center's `data/viewscreen-assets.json` contains the generated cover
+  as the current `cover` asset.
+- `hf-broll/storyboard.json` and `hf-broll/public/index.html` — retained
+  source for the rendered B-roll pass.
+- `edit/blog_post_draft.md` — complete reviewable Beehiiv draft, including
+  subtitle, tags, and SEO meta block.
+- `edit/youtube-info.md` contains a `## Pinned Comment` block (drafted
+  comment + alternates) — see "Pinned Comment" below.
+- `logs/qa-episode-YYYY-MM-DD.log` — captured final QA PASS/FAIL table.
+
+There is no default "fast episode" mode. Skipping any gate requires an
+explicit user instruction and must be reported as an intentional exception.
 
 ## Blog Repurposing (Beehiiv)
 
@@ -367,18 +517,18 @@ Added 2026-08-06. Every episode also gets repurposed into a blog post on the Joe
 **Title:** reuse the same hook-generation process as the YouTube title (see "YouTube Title" above) — same winning title on both, since it's already been optimized for CTR + SEO and duplicating it here reinforces the same search term instead of splitting it. This is the page H1/on-page title, not the meta title (see "SEO Meta" immediately below) — the two serve different jobs and should say different things.
 
 **SEO Meta** (added 2026-08-07, mandatory every post): generate a dedicated meta title and meta description for Beehiiv's SEO settings, distinct from the on-page H1/subtitle above — the H1 is what a reader sees on the page, the meta title/description are what Google's SERP and AI-crawler snippets actually show, and they have their own character budgets and framing needs.
-- **Meta title: 60 character limit.** Front-load the primary keyword (the tool/product name) and, where the episode supports it, a high-intent comparison or modifier term people actually search (e.g. "vs Claude Code," "pricing," "review") rather than a clever-but-keyword-empty phrase. Should differ in wording from the on-page title so the two don't cannibalize the same SERP real estate.
-- **Meta description: 145 character limit.** Lead with the concrete hook (the stat, the catch, the surprising mechanism), cover secondary keywords the title didn't fit, and close on an extractable answer-style clause — this is prime AEO real estate for answer-engine snippet pulls.
-- Draft 2-3 candidate pairs, pick the strongest by the same CTR + keyword-match logic as "YouTube Title" above, and write the winner (plus alternates) into a `## SEO Meta` block in `blog_post_draft.md`, directly under the `**Tags:**` line — e.g.:
+- **Meta title: 50-69 characters inclusive.** Count every visible character, including spaces and punctuation, but not the Markdown label. Front-load the primary keyword (the tool/product name) and, where the episode supports it, a high-intent comparison or modifier term people actually search (e.g. "vs Claude Code," "pricing," "review") rather than a clever-but-keyword-empty phrase. It must differ in wording from the on-page title so the two don't cannibalize the same SERP real estate.
+- **Meta description: 130-160 characters inclusive.** Count every visible character, including spaces and punctuation, but not the Markdown label. Lead with the concrete hook (the stat, the catch, the surprising mechanism), cover secondary keywords the title didn't fit, and close on an extractable answer-style clause — this is prime AEO real estate for answer-engine snippet pulls.
+- Draft 2-3 candidate pairs that each already meet both character ranges, count every candidate, pick the strongest by the same CTR + keyword-match logic as "YouTube Title" above, and write the winner (plus alternates) into a `## SEO Meta` block in `blog_post_draft.md`, directly under the `**Tags:**` line — e.g.:
   ```
   ## SEO Meta (for Beehiiv SEO settings — not the page title/subtitle above)
 
-  **Meta Title (60 char limit):** ...
-  **Meta Description (145 char limit):** ...
+  **Meta Title (50-69 chars; actual: NN):** ...
+  **Meta Description (130-160 chars; actual: NN):** ...
 
   Alternates:
-  - Title: ... (NN)
-  - Description: ... (NN)
+  - Title: ... (NN chars)
+  - Description: ... (NN chars)
   ```
 - When the post is eventually pushed live via `save_post`, pass the winning pair as `seo_settings.default_title` / `seo_settings.default_description` so the SERP metadata matches what was authored here rather than falling back to the post title/body.
 
@@ -391,6 +541,26 @@ Added 2026-08-06. Every episode also gets repurposed into a blog post on the Joe
 **Publishing:** draft only, via Beehiiv's `save_post` (never auto-publishes — promotion stays a manual action in the Beehiiv UI). `learn_post_authoring` (the tool that returns Beehiiv's exact HTML contract) is plan-gated on the current subscription; until upgraded, write the draft as reviewable markdown for manual copy-paste into the Beehiiv editor rather than risk pushing malformed HTML via `save_post`.
 
 **Backfilling past episodes:** for the standing daily process, drafts live at `Content/<date>-podcast/edit/blog_post_draft.md`, next to that episode's other pipeline output. When backfilling a batch of already-published episodes instead, save all of them flat into one consolidated folder (`Content/podcast-blog-backfill/<date>-blog-post.md`) rather than spreading them across per-episode folders — easier to grab each one for manual copy-paste without navigating in and out of dated directories. Episode source folders for a backfill batch may live in a Drive archive rather than locally; if the local `CloudStorage` mount fails to read/copy a file directly (`Resource deadlock avoided` or similar), fall back to the Google Drive API (`search_files` for the file ID, `download_file_content` to fetch it, decode the returned base64 locally) rather than retrying the same local read repeatedly.
+
+## Pinned Comment
+
+Added 2026-08-26. After the video uploads and the companion blog post publishes, Joe manually pins a YouTube comment pointing viewers to the newsletter post — this is a standing habit, not a one-off, so drafting it is now a mandatory pipeline step rather than something written from scratch after the fact each day.
+
+**Write, don't just link.** A bare "check the link below" performs worse than a comment that gives a *reason* to click — a specific detail from that day's blog post (a stat, a named source, a thing that didn't make the video) creates its own curiosity gap, the same logic as the video title and B-roll card picks.
+
+1. Pull one concrete, specific detail from `edit/blog_post_draft.md` that isn't already the headline of the video — a named creator/source, a stat, or the sharpest sub-point from an H2 section. This is the differentiator that makes the comment worth clicking, not filler.
+2. Draft 2-3 candidate comments (60-150 characters is typical for a pinned comment — short enough to read in the collapsed view). Vary the angle: direct/utility, curiosity/incomplete-loop, value-stacked. Run candidates through `no-ai-slop`.
+3. Pick the strongest one autonomously (same CTR-judgment logic as YouTube Title) and write it into `edit/youtube-info.md` under a `## Pinned Comment` heading, e.g.:
+   ```
+   ## Pinned Comment (post after upload, then pin it)
+
+   [chosen comment text] [PASTE BEEHIIV POST LINK HERE ONCE PUBLISHED]
+
+   Alternates:
+   - ...
+   - ...
+   ```
+4. The Beehiiv post URL isn't known yet at this point in the pipeline (blog repurposing drafts before either the video or the post is live) — leave the explicit placeholder rather than guessing a URL. This is a manual step for Joe: post the comment on the live video, then pin it, once both the video and the blog post are actually up.
 
 ## Customization
 
@@ -450,7 +620,8 @@ This shouldn't happen with word-level timestamps. Report as bug if it does.
 ### Daily podcast automation
 ```bash
 cd ~/podcasts/daily-pulse/2026-07-24/
-# Drop in: episode.mp3, brand-loop.mp4
+# Drop in: episode.mp3 — the brand loop resolves automatically from
+# ~/.claude/skills/podcast-video/brand-assets/brand-loop.mp4, no need to place it
 /podcast-video
 # Outputs ready in ./edit/ — upload to YouTube
 ```
@@ -500,5 +671,5 @@ Built on the `video-use` framework. Uses:
 
 ---
 
-**Version:** 1.3.0
-**Last Updated:** 2026-08-07
+**Version:** 1.5.0
+**Last Updated:** 2026-09-01

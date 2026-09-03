@@ -37,7 +37,9 @@ cd ~/podcasts/daily-pulse/2026-07-24/
 
 # You should have:
 # - your-episode.mp3 (or .m4a)
-# - your-brand-loop.mp4
+# The brand loop is a fixed asset — it resolves automatically from
+# ~/.claude/skills/podcast-video/brand-assets/brand-loop.mp4, not something
+# to place per episode.
 ```
 
 ### Step 2: Run the skill
@@ -194,8 +196,8 @@ Common colors:
 ### Error: "No audio file found"
 **Solution:** Place a `.mp3` or `.m4a` file in current directory
 
-### Error: "No video file found"
-**Solution:** Place a `.mp4` brand loop in current directory
+### Error: "brand loop not found at ..."
+**Solution:** The fixed brand loop is missing from `~/.claude/skills/podcast-video/brand-assets/brand-loop.mp4`. Don't substitute another file you find lying around — confirm with Joe where the current one is (or restore it from the Drive archive) and place it at that exact path.
 
 ### Error: "Transcription failed"
 **Solution:** Check your ElevenLabs API key:

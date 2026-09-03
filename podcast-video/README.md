@@ -8,7 +8,9 @@ Fully automated daily podcast video builder for YouTube.
 cd your-podcast-episode-folder/
 # Place your files:
 # - episode.mp3 (your audio)
-# - brand-loop.mp4 (your logo/brand video)
+# The brand loop is a fixed asset resolved automatically from
+# ~/.claude/skills/podcast-video/brand-assets/brand-loop.mp4 — no need to
+# place one per episode. Pass --video only to override it for a one-off.
 
 # Run the skill
 ~/.claude/skills/podcast-video/build_video.py
@@ -94,6 +96,8 @@ Edit `~/.claude/skills/podcast-video/config.json`:
 
 ## Brand Video Guidelines
 
+The daily brand loop is fixed at `~/.claude/skills/podcast-video/brand-assets/brand-loop.mp4` (see Quick Start above) — this section describes what makes a good one if you're ever replacing it, not something to hand-pick per episode.
+
 Your brand loop should:
 - ✅ Be 5-10 seconds long
 - ✅ Have no black frames at end
@@ -135,8 +139,8 @@ Your brand loop should:
 ### "No audio file found"
 Place a `.mp3` or `.m4a` in the current directory.
 
-### "No video file found"
-Place a `.mp4` brand loop in the current directory.
+### "brand loop not found at ..."
+The fixed brand loop is missing from `~/.claude/skills/podcast-video/brand-assets/brand-loop.mp4`. Don't substitute another file — confirm with Joe where the current one is (or restore it from the Drive archive) and place it at that exact path.
 
 ### "Transcription failed"
 - Check `ELEVENLABS_API_KEY` is set

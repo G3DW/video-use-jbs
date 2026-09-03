@@ -537,7 +537,7 @@ def build_outro(card, accent, W, H=1080):
       background: rgba(27,42,59,0.92);
     }}
     .card[data-card-id="{cid}"] .center {{ text-align: center; }}
-    .card[data-card-id="{cid}"] .wordmark {{ height: 260px; margin-bottom: 30px; }}
+    .card[data-card-id="{cid}"] .wordmark {{ height: 460px; margin-bottom: 40px; }}
     .card[data-card-id="{cid}"] .tagline {{
       font-family: 'SF Mono', 'Inter', monospace; font-size: 36px; letter-spacing: 4px; color: var(--accent-{accent});
       text-transform: uppercase; font-weight: 700;
@@ -837,7 +837,7 @@ def build_captions(transcript_words, content_start, fps):
 </div>'''
 
         hosts.append(
-            f'''      <div class="card-host clip" data-card-id="{cid}" data-start="{start:.4f}" data-duration="{duration:.4f}" data-track-index="4" style="left:0px;top:0px;width:1920px;height:1080px;visibility:hidden;opacity:0;">
+            f'''      <div class="card-host clip" id="{cid}-host" data-card-id="{cid}" data-start="{start:.4f}" data-duration="{duration:.4f}" data-track-index="{4 + ci % 2}" style="left:0px;top:0px;width:1920px;height:1080px;visibility:hidden;opacity:0;">
 {card_html}
 
       </div>'''
@@ -905,14 +905,14 @@ def build(args):
         duration = q(card["endSec"] - card["startSec"], fps)
         inner_html = BUILDERS[arch](card, accent, W, H)
         card_hosts.append(
-            f'''      <div class="card-host clip" data-card-id="{cid}" data-start="{start:.4f}" data-duration="{duration:.4f}" data-track-index="2" style="left:0px;top:0px;width:{W}px;height:{H}px;visibility:hidden;opacity:0;">
+            f'''      <div class="card-host clip" id="{cid}-host" data-card-id="{cid}" data-start="{start:.4f}" data-duration="{duration:.4f}" data-track-index="2" style="left:0px;top:0px;width:{W}px;height:{H}px;visibility:hidden;opacity:0;">
 {inner_html}
 
       </div>'''
         )
         card_gsap_blocks.append(card_gsap(card, fps))
 
-    title_host = f'''      <div class="card-host clip" data-card-id="title-card" data-start="0.0000" data-duration="{title_end:.4f}" data-track-index="3" style="left:0px;top:0px;width:{W}px;height:{H}px;visibility:hidden;opacity:0;">
+    title_host = f'''      <div class="card-host clip" id="title-card-host" data-card-id="title-card" data-start="0.0000" data-duration="{title_end:.4f}" data-track-index="3" style="left:0px;top:0px;width:{W}px;height:{H}px;visibility:hidden;opacity:0;">
 {build_title_card(title, kicker)}
 
       </div>'''
@@ -968,7 +968,6 @@ def build(args):
       <div class="video-wrapper" id="video-wrap">
         <video id="bg-video" src="input-video.mp4" muted playsinline data-start="0" data-duration="{dur}" data-track-index="1"></video>
       </div>
-      <audio id="source-audio" src="input-video.mp4" data-start="0" data-duration="{dur}" data-track-index="10" data-volume="1"></audio>
 '''
 
     tail = f'''
@@ -1007,15 +1006,19 @@ def build(args):
 
 
 def finalize(args):
-    """Promote hf-broll/output.mp4 (the B-roll composition — the true final
-    deliverable) to the top-level episode video, and refresh edit/youtube-info.md's
-    Duration/File Size against it. build_video.py writes youtube-info.md against
-    its own pre-B-roll render; without this step that doc goes stale the moment
-    the B-roll pass produces a bigger/different final file."""
+    """Promote the B-roll composition with its source episode audio intact.
+
+    HyperFrames renders this composition video-only because its audio processing
+    can stall on long-form captures.  The staged input retains the approved audio,
+    so mux it back during promotion rather than ever publishing a silent visual.
+    """
     episode_dir = Path(args.episode_dir).resolve()
     broll_output = episode_dir / "hf-broll" / "output.mp4"
+    source_video = episode_dir / "hf-broll" / "public" / "input-video.mp4"
     if not broll_output.exists():
         sys.exit(f"[error] {broll_output} not found — run `build --render` or the hyperframes render step first")
+    if not source_video.exists():
+        sys.exit(f"[error] {source_video} not found — run the stage step before finalizing")
 
     if args.output:
         final_video = Path(args.output)
@@ -1027,8 +1030,14 @@ def finalize(args):
             sys.exit("[error] --output not given and no top-level *-final.mp4 found to infer the name from")
         final_video = existing[0]
 
-    shutil.copyfile(broll_output, final_video)
-    print(f"[info] promoted {broll_output} -> {final_video}")
+    muxed_video = final_video.with_name(f".{final_video.stem}.broll-promoting.mp4")
+    subprocess.run(
+        ["ffmpeg", "-y", "-loglevel", "error", "-i", str(broll_output), "-i", str(source_video),
+         "-map", "0:v:0", "-map", "1:a:0", "-c", "copy", "-shortest", str(muxed_video)],
+        check=True,
+    )
+    muxed_video.replace(final_video)
+    print(f"[info] promoted B-roll video + approved source audio -> {final_video}")
 
     probe = subprocess.run(
         ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", str(final_video)],

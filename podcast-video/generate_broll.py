@@ -537,7 +537,14 @@ def build_outro(card, accent, W, H=1080):
       background: rgba(27,42,59,0.92);
     }}
     .card[data-card-id="{cid}"] .center {{ text-align: center; }}
-    .card[data-card-id="{cid}"] .wordmark {{ height: 460px; margin-bottom: 40px; }}
+    .card[data-card-id="{cid}"] .wordmark {{
+      height: 460px; margin-bottom: 40px;
+      /* jbs-wordmark-color.png's letterforms are near-black strokes meant for a
+         light background — nearly invisible against this card's dark navy
+         overlay (confirmed 2026-09-07). Force it to render as solid white so
+         it's legible here regardless of the source asset's own colors. */
+      filter: brightness(0) invert(1);
+    }}
     .card[data-card-id="{cid}"] .tagline {{
       font-family: 'SF Mono', 'Inter', monospace; font-size: 36px; letter-spacing: 4px; color: var(--accent-{accent});
       text-transform: uppercase; font-weight: 700;
@@ -776,8 +783,19 @@ def title_gsap(fade_start, end, fps):
 
 
 # ---------------------------------------------------------------- captions
-def build_captions(transcript_words, content_start, fps):
+def build_captions(transcript_words, content_start, fps, skip_windows=None):
+    """skip_windows: list of (startSec, endSec) time ranges (e.g. from
+    storyboard cards with zone == "fullscreen") over which no caption chunk
+    should be authored at all. A fullscreen card fades out #video-wrap to
+    reveal its own background, but caption card-hosts are independent
+    siblings of #video-wrap in the DOM — fading the video does not fade
+    them, so without this filter captions from the talking-head audio bleed
+    through on top of a fullscreen card (confirmed 2026-09-07 on an outro
+    CTA card). Dropping the overlapping chunks up front is simpler and more
+    robust than trying to choreograph a matching fade for every caption host
+    that might land inside such a window."""
     words = [w for w in transcript_words if w.get("type") == "word" and w["start"] >= content_start]
+    skip_windows = skip_windows or []
 
     turns = []
     cur = []
@@ -805,7 +823,13 @@ def build_captions(transcript_words, content_start, fps):
         if buf:
             chunks.append(buf)
 
-    print(f"[info] {len(words)} words -> {len(turns)} speaker turns -> {len(chunks)} caption chunks")
+    def in_skip_window(start, end):
+        return any(start < win_end and end > win_start for win_start, win_end in skip_windows)
+
+    chunks = [c for c in chunks if not in_skip_window(c[0]["start"], c[-1]["end"] + 0.12)]
+
+    print(f"[info] {len(words)} words -> {len(turns)} speaker turns -> {len(chunks)} caption chunks"
+          + (f" ({len(skip_windows)} fullscreen window(s) excluded)" if skip_windows else ""))
 
     hosts = []
     gsap_blocks = []
@@ -918,7 +942,8 @@ def build(args):
       </div>'''
     title_gsap_block, _, _ = title_gsap(title_fade_start, title_end, fps)
 
-    caption_hosts, caption_gsap_blocks = build_captions(transcript["words"], content_start, fps)
+    fullscreen_windows = [(c["startSec"], c["endSec"]) for c in storyboard["cards"] if c.get("zone") == "fullscreen"]
+    caption_hosts, caption_gsap_blocks = build_captions(transcript["words"], content_start, fps, skip_windows=fullscreen_windows)
 
     theme_css = "\n".join(f"        --{k}: {v};" for k, v in THEME.items())
 

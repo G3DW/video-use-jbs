@@ -9,26 +9,60 @@ enabled: true
 
 Fully automated daily podcast video builder. Takes your audio file and brand video loop, outputs a publication-ready video with waveform overlay, transcript, chapter timestamps, and YouTube subtitles.
 
-## How this fits into the daily pipeline (as of 2026-07-28)
+## ⚠ MANDATORY ROUTING — read this before doing anything else
+
+**This file documents the scripts. It is NOT the orchestrator for daily NotebookLM episodes, and following its sections top-to-bottom for a daily episode will skip a required review gate.**
+
+If the request is anything like "run today's podcast," "build the daily episode," "run the podcast pipeline," or a bare `/podcast-video` with no custom audio file supplied — **stop and invoke the `daily-podcast-pipeline` skill instead.** That skill (not this one) owns:
+- the mandatory **Stage 1 (draft) → review → Stage 2 (production)** gate, with **no auto-proceed, ever** — Stage 2 (dubbing, full render, B-roll, thumbnail, blog draft) only runs after the user has explicitly reviewed `review.html`/the claims-report and said something like "approve today's podcast";
+- the Command Center `podcast-review/<date>.json` state tracking;
+- the live claim-verification pass on transcript stats.
+
+Only follow this file's own steps directly (Quick Start, Full Pipeline, etc.) when:
+- you're already executing a step that `daily-podcast-pipeline` explicitly told you to run (e.g. its Stage 2 instructions literally say "run build_video.py per that doc's step 2" — that's this file), or
+- it's a genuine one-off/manual episode with audio the user handed you directly, outside the daily NotebookLM flow, where there's no brief/review-gate to speak of.
+
+**This mistake already happened once** (2026-09-16): every daily episode's `Content/<date>-podcast/` folder got fully produced by running this file's scripts straight through, without ever loading `daily-podcast-pipeline` — so the review gate, the claims-report fact-check, and the Command Center status tracking were silently skipped for weeks. Every `podcast-review/<date>.json` before 2026-09-16 is stuck at `awaiting_local_run` even though the episodes shipped. Don't repeat that: for a daily episode, `daily-podcast-pipeline` is the first skill you load, not this one.
+
+## How this fits into the daily pipeline (as of 2026-09-16)
 
 This repo owns the *scripts* (`regenerate_dialogue.py`, `build_video.py`,
 `generate_broll.py`) and is the source of truth for their exact CLI flags.
-It does not own the orchestration — that lives in the Cowork
-`daily-podcast-pipeline` skill, which morning-pulse now chains into
-automatically every morning once the NotebookLM audio deep-dive is ready.
-That skill must run one continuous local completion workflow:
+It does not own the orchestration — that lives in the `daily-podcast-pipeline`
+skill, which morning-pulse now chains into automatically every morning once
+the NotebookLM audio deep-dive is ready, and which a local Claude Code
+session should also load explicitly for any daily-episode request routed
+here (see the routing box above). That skill runs a strictly **two-stage**
+workflow, not one continuous pass:
 
-1. Run `regenerate_dialogue.py` → `build_video.py` and promote the base
-   render to `<JoeBuildsSystems>/Content/<date>-podcast/daily-ai-pulse-<date>-final.mp4`.
-2. Generate the thumbnail, author the B-roll storyboard, build/render/promote
-   the HyperFrames B-roll pass, and draft the blog post.
+**Stage 1 (draft, always runs first, always stops):**
+1. Raw transcription + humanization + live claim-verification against the
+   transcript's stats (`claims-report.json`).
+2. Draft the B-roll storyboard *plan* (anchor quotes + timing, not rendered
+   assets yet) and generate the thumbnail options.
+3. Write `review.html` (transcript + claims + storyboard plan + thumbnails)
+   and set Command Center's `podcast-review/<date>.json` status to
+   `pending_review`. **Stop.** No dubbing, no rendering, regardless of time
+   of day or how the run was triggered.
+
+**Stage 2 (production, only on explicit user approval):**
+1. Voice-clone the dialogue, render the base video, promote it.
+2. Generate the thumbnail (if not already done in Stage 1), author/remap the
+   B-roll storyboard onto final timing, build/render/promote the HyperFrames
+   B-roll pass, and draft the blog post.
 3. Run final QA and save its PASS/FAIL record before reporting completion.
 
-**Do not request separate approval for B-roll, the thumbnail, or the blog
-draft.** They are mandatory output gates for every episode. Make the needed
-editorial judgments autonomously from the brief, transcript, and research.
-Only stop for a real blocker (missing source material, failed required tool,
-or unavailable account) and report the episode as blocked — never complete.
+**Do not request separate approval for individual Stage 2 sub-steps** (B-roll,
+the thumbnail, the blog draft) once Stage 2 has actually started — those are
+mandatory output gates within an already-approved production run, and the
+editorial judgment calls inside them (which stat gets a card, which pose for
+the thumbnail) should be made autonomously. **The one approval that is never
+skippable is the Stage 1 → Stage 2 transition itself** — that requires the
+user to have actually seen `review.html` (or been told about it) and said
+something that means "go," not just an ambient "run the pipeline" request.
+Only stop mid-Stage-2 for a real blocker (missing source material, failed
+required tool, or unavailable account) and report the episode as blocked —
+never skip the Stage 1 review to avoid a blocker.
 
 See `[[JoeBuildsSystems/Projects/morning-pulse-pipeline]]` in the AgenticOS
 vault for the full end-to-end architecture (morning brief → audio → this
@@ -83,14 +117,17 @@ implications:
 
 ## Quick Start
 
+**This Quick Start is for a one-off/manual episode only** (audio you hand it directly, outside the daily NotebookLM flow). For "run today's podcast" or any daily-episode request, load `daily-podcast-pipeline` instead — see the routing box near the top of this file.
+
 ```bash
 /podcast-video
 ```
 
-The skill will:
+For a manual episode, the skill will:
 - Scan current directory for podcast audio (mp3/m4a) and brand video (mp4)
 - Prompt you for episode title and any special instructions
-- Run the complete production pipeline
+- Run the complete production pipeline in one pass (no review gate — there's
+  no brief/claims-report to review for a manual episode)
 - Output everything to `./edit/` directory
 
 ## Source File Auto-Discovery (Daily Pipeline)
@@ -433,6 +470,14 @@ Once `build_video.py` has produced the final rendered episode, `generate_broll.p
 
 Card *content* — which stat, quote, or topic-marker moment gets a card, and its exact wording — is still a per-episode judgment call (read the transcript/chapters/brief and pick the moments worth calling out), not something this script infers on its own.
 
+**Front-load the anchor metric (added 2026-09-04).** If `brief.json`'s
+`trend.anchorMetric` is populated, the first non-topic-marker card should
+present that exact number within the episode's first 30-45 seconds
+(excluding the spoken intro), as a `stat` or `stat-warning` card — not
+saved for a later moment. Front-loading the numeric hook is the clearest
+performance driver found in the 2026-09-04 audit review; don't bury it
+mid-episode waiting for a "better" spot.
+
 ```
 1. python3 generate_broll.py stage --episode-dir Content/2026-MM-DD-podcast \
      --video edit/daily-ai-pulse-2026-MM-DD-final.mp4
@@ -492,6 +537,11 @@ are substantive:
 - `edit/youtube-info.md` contains a `## Pinned Comment` block (drafted
   comment + alternates) — see "Pinned Comment" below.
 - `logs/qa-episode-YYYY-MM-DD.log` — captured final QA PASS/FAIL table.
+- `edit/source_transcript/transcripts/<stem>.claims-report.json` (added
+  2026-09-04, produced by daily-podcast-pipeline Stage 1's claim-verifier
+  step) — no unresolved `mismatch` or `unverifiable` entries, or an
+  explicit note in the episode summary that Joe reviewed and accepted the
+  risk on a specific flagged claim.
 
 There is no default "fast episode" mode. Skipping any gate requires an
 explicit user instruction and must be reported as an intentional exception.
@@ -586,6 +636,8 @@ Adjust in config or via flags:
 The `**Episode:**` title (added 2026-08-06) is not the episode brief's headline pasted in as-is, and it is not the thumbnail's on-image headline reused verbatim — thumbnail text and video title do different jobs (thumbnail wins the visual scan, title wins the search/click decision) and repeating one as the other wastes an impression. Generate it as its own sub-step, mandatory every episode:
 
 1. Draft 4-6 hook-style title candidates by invoking the `tiktok-script-structurer` skill for its hook-type taxonomy only (Statistic, Problem, Contrarian, Curiosity Gap, Insider, Future Pacing, etc.) — not the full TikTok script structure (no on-screen text cue, visual hook, second beat). Pull the concrete stat/quote/mechanism for each hook straight from the episode's transcript/chapters, the same way B-roll card content gets picked. Explicitly exclude any candidate that duplicates the thumbnail headline's wording — they need to say different things.
+
+   **If `brief.json`'s `trend.anchorMetric` is populated, treat it as the primary numeric hook** (added 2026-09-04, after an unsolicited YouTube-channel audit's core claim held up under a real look at the channel's own numbers: the accounting-automation episode, "This AI Accounting Tool Auto-Books 95% of Your Transactions," pulled 406 views against a typical 5-90 view range — the clearest performance signal found on the channel to date). Anchor at least one candidate directly on that figure before drafting others from scratch elsewhere in the transcript.
 2. Run the candidates through `no-ai-slop` to cut AI-cadence patterns (binary contrasts, dramatic fragmentation, colon reveals) and tighten to 50-70 characters — YouTube titles run as plain text in search results with no thumbnail alongside, so they have to stand alone.
 3. **Pick the best one autonomously** — don't ask the user to choose. Weigh it on two axes: click-through likelihood (a concrete stat or named entity beats an abstract claim; loss-aversion/curiosity-gap framing beats a flat description) and SEO (does it contain the actual search terms someone would type — "Claude," the specific tool/technique name, the concrete numbers — rather than only clever phrasing). A title that's punchy but keyword-empty loses to one that's slightly plainer and matches real search queries. State the pick and a one-line reason in the summary; keep the runner-up options in `youtube-info.md`'s "Alternative Titles for the algo" block for future A/B testing, same as today.
 4. Write the winner into both the `**Episode:**` field and the description body's title line in `edit/youtube-info.md`.
@@ -671,5 +723,5 @@ Built on the `video-use` framework. Uses:
 
 ---
 
-**Version:** 1.5.0
-**Last Updated:** 2026-09-01
+**Version:** 1.7.0
+**Last Updated:** 2026-09-17

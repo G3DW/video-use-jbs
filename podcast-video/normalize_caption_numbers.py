@@ -105,7 +105,7 @@ def word_range_for_span(index_map, start_char, end_char):
     return lo, hi
 
 
-VERSION_RE = re.compile(r"\b([a-z]+)\s+point\s+([a-z]+)\b", re.IGNORECASE)
+VERSION_RE = re.compile(r"\b([a-z]+(?:-[a-z]+)?)\s+point\s+([a-z]+(?:-[a-z]+)?)\b", re.IGNORECASE)
 DATE_RE = re.compile(
     r"\b(" + "|".join(MONTHS) + r")\s+([a-z-]+),?\s+twenty\s+([a-z-]+),?",
     re.IGNORECASE,

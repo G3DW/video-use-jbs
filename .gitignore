@@ -91,3 +91,13 @@ videos/jbs-shorts-recut/public/snapshots/frame-01-at-262.036s.png
 website-feedback/segment.m4a
 videos/jbs-shorts-recut/audio.mp3
 videos/jbs-shorts-recut/output.mp4
+
+# Ad hoc local video/audio project working directories (large binary
+# outputs from individual editing sessions, not skill source — some
+# individual files here exceed GitHub's 100MB push limit)
+.codex-staging/
+podcast-video/shorts/temp/
+transcript_allie_mark/
+videos/IMG_4689-recut/
+videos/accounting-automation/
+videos/tiktok-fomo-response/

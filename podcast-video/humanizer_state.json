@@ -4,19 +4,11 @@
     "Something worth sitting with.",
     "That's the open question.",
     "That's the thread to pull on.",
-    "Make of that what you will."
+    "Make of that what you will.",
+    "Chew on that for a bit.",
+    "Something worth sitting with."
   ],
   "opening_energizer": [
-    "Okay, here's the story.",
-    "Alright, let's get into the details.",
-    "Let's get into the weeds on this.",
-    "Let's break it down.",
-    "Okay, let's dive in.",
-    "Here we go.",
-    "Alright, let's get into the details.",
-    "Okay, here's the story.",
-    "Let's get into the weeds on this.",
-    "Let's break it down.",
     "Okay, let's dive in.",
     "Here we go.",
     "Let's dig in.",
@@ -26,19 +18,19 @@
     "Okay, let's dive in.",
     "Here we go.",
     "Let's get into the weeds on this.",
-    "Alright, let's get into the details."
+    "Alright, let's get into the details.",
+    "Let's break it down.",
+    "Alright, let's go.",
+    "Okay, let's dive in.",
+    "Let's dig in.",
+    "Okay, here's the story.",
+    "Let's get into the weeds on this.",
+    "Alright, let's get into the details.",
+    "Let's break it down.",
+    "Let's dig in.",
+    "Alright, let's go."
   ],
   "cta_outro": [
-    "Like this if it landed, {ask}, and subscribe so tomorrow's drop doesn't slip past you. Catch you next time.",
-    "If that was useful, smash like, {ask}, and hit subscribe so tomorrow's episode lands in your feed. Catch you next time.",
-    "If this was helpful, go ahead and like it, {ask}, and subscribe so you catch tomorrow's episode. Talk soon.",
-    "If you got something out of this, drop a like, {ask}, and subscribe \u2014 new episode tomorrow. See you then.",
-    "Give it a like if this helped, {ask}, and subscribe \u2014 we're back tomorrow. See you then.",
-    "If this was worth your time, like it, {ask}, and hit that subscribe button for tomorrow's episode. See you soon.",
-    "Enjoyed this one? Drop a like, {ask}, and subscribe so you don't miss the next one. Until next time.",
-    "If that was useful, smash like, {ask}, and hit subscribe so tomorrow's episode lands in your feed. Catch you next time.",
-    "Like this if it landed, {ask}, and subscribe so tomorrow's drop doesn't slip past you. Catch you next time.",
-    "Give it a like if this helped, {ask}, and subscribe \u2014 we're back tomorrow. See you then.",
     "If this was helpful, go ahead and like it, {ask}, and subscribe so you catch tomorrow's episode. Talk soon.",
     "If this was worth your time, like it, {ask}, and hit that subscribe button for tomorrow's episode. See you soon.",
     "Enjoyed this one? Drop a like, {ask}, and subscribe so you don't miss the next one. Until next time.",
@@ -48,7 +40,17 @@
     "Give it a like if this helped, {ask}, and subscribe \u2014 we're back tomorrow. See you then.",
     "Like this if it landed, {ask}, and subscribe so tomorrow's drop doesn't slip past you. Catch you next time.",
     "If this was worth your time, like it, {ask}, and hit that subscribe button for tomorrow's episode. See you soon.",
-    "Enjoyed this one? Drop a like, {ask}, and subscribe so you don't miss the next one. Until next time."
+    "Enjoyed this one? Drop a like, {ask}, and subscribe so you don't miss the next one. Until next time.",
+    "If that was useful, smash like, {ask}, and hit subscribe so tomorrow's episode lands in your feed. Catch you next time.",
+    "If you got something out of this, drop a like, {ask}, and subscribe \u2014 new episode tomorrow. See you then.",
+    "If this was helpful, go ahead and like it, {ask}, and subscribe so you catch tomorrow's episode. Talk soon.",
+    "If this was worth your time, like it, {ask}, and hit that subscribe button for tomorrow's episode. See you soon.",
+    "Like this if it landed, {ask}, and subscribe so tomorrow's drop doesn't slip past you. Catch you next time.",
+    "Enjoyed this one? Drop a like, {ask}, and subscribe so you don't miss the next one. Until next time.",
+    "Give it a like if this helped, {ask}, and subscribe \u2014 we're back tomorrow. See you then.",
+    "If you got something out of this, drop a like, {ask}, and subscribe \u2014 new episode tomorrow. See you then.",
+    "If this was worth your time, like it, {ask}, and hit that subscribe button for tomorrow's episode. See you soon.",
+    "If this was helpful, go ahead and like it, {ask}, and subscribe so you catch tomorrow's episode. Talk soon."
   ],
   "unpack_transition": [
     "Let's pull this apart a bit.",
@@ -56,13 +58,18 @@
     "Okay, here's where it gets good.",
     "Okay, walk me through it.",
     "So let's actually get into it.",
-    "Let's pull this apart a bit."
+    "Let's pull this apart a bit.",
+    "Right, let's dig in.",
+    "So let's get into the mechanics of this."
   ],
   "audience_address": [
     "you, running things solo or with a lean team",
-    "you, whether you're a one-person shop or a small team"
+    "you, whether you're a one-person shop or a small team",
+    "you, running lean without a big team behind you",
+    "you, whether that's solo or a small crew"
   ],
   "meaning_pivot": [
-    "So bottom line, what do you actually do with this?"
+    "So bottom line, what do you actually do with this?",
+    "So practically speaking, what now?"
   ]
 }

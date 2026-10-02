@@ -58,7 +58,30 @@ WORD_ARTIFACTS = [
      "note": "ASR occasionally garbles 'CAPTCHA'/'CAPTCHAs' as 'KPTCA'/'KPTCAs'"},
     {"word_regex": r"^claw$", "replacement": "Claude",
      "note": "ASR mishears standalone 'Claude' as 'Claw' (bleed-through from 'OpenClaw' being said constantly in the same episode) — 'OpenClaw' itself always tokenizes as one word, so this only fires on a bare 'Claw'"},
+    {"word_regex": r"^scaleo$", "replacement": "Scalio",
+     "note": "ASR hears the product name 'Scalio' (an AI video ad maker) as 'Scaleo' — seen on the dubbed 2026-10-01 episode"},
 ]
+
+# Learned word fixes (approved by Joe via CommandCenter's apply-learning.js). Loaded from
+# a data file instead of editing this source. Entries are validated: single lowercase
+# word, 4+ letters, anchored regex, and a single-token replacement. Anything else is ignored.
+def _load_learned_artifacts():
+    import os
+    default = "/Users/joey_makes_stuff/Documents/AgenticOS/CommandCenter/data/morning-pulse/learnings/learned-artifacts.json"
+    path = os.environ.get("MORNING_PULSE_LEARNED_ARTIFACTS", default)
+    try:
+        entries = json.loads(Path(path).read_text()).get("entries", [])
+    except Exception:
+        return []
+    ok = []
+    for e in entries:
+        rx, rep = e.get("word_regex", ""), e.get("replacement", "")
+        if re.fullmatch(r"\^[a-z][a-z']{3,}\$", rx) and isinstance(rep, str) and rep and " " not in rep and len(rep) <= 40:
+            ok.append({"word_regex": rx, "replacement": rep, "note": e.get("note", "learned")})
+    return ok
+
+
+WORD_ARTIFACTS.extend(_load_learned_artifacts())
 
 # Multi-word mishearings: regex matched against the reconstructed full
 # transcript text (spans multiple word/spacing tokens), spliced out and

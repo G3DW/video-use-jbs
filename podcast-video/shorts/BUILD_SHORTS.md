@@ -1,3 +1,6 @@
+> **Superseded for daily episodes (2026-10-02):** use `PORTRAIT_CLIPS.md` (portrait-native clips with
+> cards, safe-zone layout and one shared asset folder). This older guide covers chapter-length, waveform-style shorts.
+
 # Building Short-Form Content - Complete Guide
 
 ## Overview

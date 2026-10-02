@@ -1,0 +1,64 @@
+{
+  "_comment": "Single source of truth for vertical shorts (portrait_clip.py). Assets are linked from the canonical folder below, never copied per clip or per episode.",
+  "canvas": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30
+  },
+  "assets": {
+    "dir": "../hf-broll-assets",
+    "subdirs": [
+      "fonts",
+      "vendor",
+      "images"
+    ],
+    "background": "images/jbs-dark-vertical.png"
+  },
+  "safe_zones": "safe_zones.json",
+  "clip": {
+    "min_seconds": 45,
+    "max_seconds": 75,
+    "audio_lead": 0.05,
+    "spoken_tail": 0.25,
+    "cta_seconds": 3.2
+  },
+  "text": {
+    "kicker": "DAILY AI PULSE",
+    "cta_title": "Full episode on YouTube",
+    "cta_sub": "Daily AI Pulse · joeBuildsSystems"
+  },
+  "output": {
+    "dir_name": "shorts",
+    "spec_name": "clips.json"
+  },
+  "post": {
+    "tiktok_max_chars": 2000,
+    "instagram_max_chars": 2000,
+    "hashtags_min": 3,
+    "hashtags_max": 6,
+    "front_load_chars": 125,
+    "episode_link_placeholder": "[PASTE YOUTUBE EPISODE LINK]"
+  },
+  "cover": {
+    "platform": "tiktok",
+    "width": 1080,
+    "height": 1920,
+    "headline_words": [
+      6,
+      8
+    ],
+    "subtitle_words": [
+      4,
+      6
+    ],
+    "tag_categories": [
+      "AI News",
+      "Build Log",
+      "Framework"
+    ],
+    "file_suffix": "-cover.png",
+    "min_width": 1000,
+    "aspect_tolerance": 0.01,
+    "_note": "jbs-adhoc-cover returns ~1076x1927 for tiktok; accept anything within 1% of 9:16 and at least 1000px wide. Do not resize the originals."
+  }
+}

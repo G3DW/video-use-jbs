@@ -433,9 +433,15 @@ The daily episodes are NotebookLM-generated two-speaker dialogue audio (the raw 
    `[PASTE YOUTUBE VIDEO COMMENT LINK... ]`-style placeholder for the
    Beehiiv post URL until that post is actually published.
 
-9. Run the `qa-episode` skill and save its PASS/FAIL table to
+9. Vertical shorts (mandatory from 2026-10-02): 3 clips of 45-75s for TikTok/Instagram,
+   built with `shorts/portrait_clip.py` from the finished episode. Pick the clips with
+   `shorts/list_sentences.py`, write `Content/<date>-podcast/shorts/clips.json`, validate, render.
+   Assets come from one shared folder (`hf-broll-assets/`) and are linked, never copied. Full workflow:
+   `shorts/PORTRAIT_CLIPS.md`. Staged only; never posted.
+
+10. Run the `qa-episode` skill and save its PASS/FAIL table to
    `logs/qa-episode-YYYY-MM-DD.log`. Do not call the episode complete until
-   every mandatory output and QA check passes.
+   every mandatory output and QA check passes (this includes the shorts).
 ```
 
 For single-narrator episodes (no diarized dialogue to regenerate), skip step 1 and run `build_video.py` directly on the raw audio, same as before.

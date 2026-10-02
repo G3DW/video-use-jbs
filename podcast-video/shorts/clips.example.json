@@ -1,0 +1,29 @@
+[
+  {
+    "slug": "cheaper-per-token",
+    "start": 134.74, "end": 189.14,
+    "headline": "Cheaper per token is not cheaper per task",
+    "cards": [
+      {"type": "compare", "at": 136.0, "dur": 6.5,
+       "aLabel": "STICKER PRICE", "aDetail": "$2 in, $10 out per million tokens",
+       "bLabel": "YOUR BILL", "bDetail": "That price times however many tokens the model writes"},
+      {"type": "stat", "at": 158.3, "dur": 5.6, "value": "$7.60",
+       "label": "Average cost per task at max effort (Artificial Analysis)", "tag": "MAX EFFORT"},
+      {"type": "stat", "at": 181.2, "dur": 5.2, "value": "-14%",
+       "label": "Output tokens vs the older model (Slack early testing)"}
+    ]
+  },
+  {
+    "slug": "test-a-new-model",
+    "start": 348.62, "end": 417.164,
+    "headline": "How to test a new AI model on your own work",
+    "cards": [
+      {"type": "steps", "at": 358.7, "dur": 58.0, "title": "THE THREE-PROMPT METHOD",
+       "steps": [
+         {"text": "Pick a real task you already finished", "at": 366.9},
+         {"text": "Freeze the setup: same files, same prompt", "at": 387.2},
+         {"text": "Run it and score it against your old result", "at": 400.0}
+       ]}
+    ]
+  }
+]
